@@ -16,11 +16,11 @@ MEDIA = os.path.join(ROOT, 'media')
 # (take, frame, file, zoom): lit frames have the panel tucked away, so they are framed
 # tighter on the pumpkin and the wall (cut from the 1920x1200 render, no upscaling)
 PICKS = [
-    ('carve', 960, 'hollow-hero.png', 1.2),        # lit, rays, and the face on the wall, awake
+    ('carve', 932, 'hollow-hero.png', 1.2),        # lit, rays, and the face on the wall, awake
     ('carve', 330, 'hollow-carving.png', 1.0),     # moonlight, knife mid-stroke
-    ('carve', 1195, 'hollow-snuffed.png', 1.0),    # snuffed: smoke, and the eyes stay on the wall
-    ('mash', 440, 'hollow-mashrabiya.png', 1.2),   # the mashrabiya stencil, lit
-    ('ghoul', 290, 'hollow-ghoul.png', 1.2),       # cut + etch stencil, lit
+    ('carve', 1168, 'hollow-snuffed.png', 1.0),    # snuffed: smoke, and the eyes stay on the wall
+    ('mash', 300, 'hollow-mashrabiya.png', 1.2),   # the mashrabiya stencil, lit
+    ('ghoul', 250, 'hollow-ghoul.png', 1.2),       # cut + etch stencil, lit
 ]
 
 

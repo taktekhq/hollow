@@ -27,7 +27,7 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 sys.path.insert(0, os.path.dirname(__file__))
-from timeline import COLD_OPEN, CUT, TAKES  # noqa: E402
+from timeline import COLD_OPEN, CUT, ORDER, TAKES  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FONTS = os.path.join(ROOT, 'fonts')
@@ -96,15 +96,8 @@ def shoot(src, z=1.0, cx=AW / 2, cy=AH / 2):
 
 
 def camera(take, k):
-    """a slow push-in on the pumpkin and the wall while the face watches"""
-    if take != 'carve':
-        return 1.0, AW / 2, AH / 2
-    keys = [(820, 1.0), (880, 1.16), (1100, 1.16), (1140, 1.0)]
-    z = 1.0
-    for (k0, z0), (k1, z1) in zip(keys, keys[1:]):
-        if k0 <= k <= k1:
-            z = z0 + (z1 - z0) * ease((k - k0) / (k1 - k0))
-    return z, 520, 320  # top-aligned: the wall stays in, the caption drops out below
+    """the takes play full frame (the panel steps back on its own during the reveal)"""
+    return 1.0, AW / 2, AH / 2
 
 
 # ---------------------------------------------------------------------------
@@ -335,15 +328,19 @@ def end_card(k):
 # callouts, a lower third above the caption (take frame ranges)
 
 CALLOUTS = {
-    'carve': [(20, 100, 'LUAU', 'your strokes become cuts; close one and the piece pops out'),
-              (380, 470, 'STATE MACHINE', 'tool pill and candle button, bound to the view model'),
-              (490, 640, 'GPU CANVAS · WGSL', 'light through your carving: glow, rays, your face on the wall'),
-              (652, 778, 'DATA BINDING', 'the sliders write the view model, the shader reads it'),
-              (800, 900, 'LUAU + WGSL', 'the face on the wall wakes up: it narrows its eyes and watches you'),
-              (992, 1050, 'LUAU', 'a fast sweep is a gust: it slides out of the light'),
-              (1160, 1212, 'LUAU', 'snuffed: smoke from the lid, and the eyes stay')],
-    'mash': [(10, 168, 'STENCIL · LUAU', 'the script carves a mashrabiya, star by star'),
-             (230, 330, 'WGSL', 'eight-point stars thrown across the room')],
+    'carve': [(2, 44, 'RML · STATE MACHINE', 'the title rises in on an eased intro timeline'),
+              (50, 104, 'LUAU', 'your strokes become cuts; close one and the piece pops out'),
+              (318, 358, 'LUAU', 'leave a cut open and you get a slit of light'),
+              (376, 482, 'STATE MACHINE', 'the tool pill slides to Etch: shave the skin instead'),
+              (512, 608, 'DATA BINDING', 'the candle and the sliders write the view model; the shader reads it'),
+              (612, 690, 'GPU CANVAS · WGSL', 'light through your carving: glow, rays, your face on the wall'),
+              (700, 820, 'LUAU + WGSL', 'the face on the wall wakes up: it narrows its eyes and watches you'),
+              (963, 1020, 'LUAU', 'a fast sweep is a gust: it slides out of the light'),
+              (1134, 1188, 'LUAU', 'snuffed: smoke rises from the lid, and the eyes stay')],
+    'ghoul': [(26, 176, 'STENCIL · LUAU', 'Ghoul: the knife cuts the eyes and mouth, then etches brows and cheeks'),
+              (182, 268, 'WGSL', 'etched skin is thin enough to glow amber')],
+    'mash': [(10, 188, 'STENCIL · LUAU', 'the script carves a mashrabiya, star by star'),
+             (196, 318, 'WGSL', 'eight-point stars thrown across the room')],
 }
 
 
@@ -389,7 +386,7 @@ def take_frame(frames_dir, name, meta, k, cam=None, pointer=True, callouts=True)
 # the cut as a list of video frames, and the map from take time to film time
 
 def plan():
-    """the film as a list of (kind, take, k, blend_k): blend_k is a carve frame crossfading out"""
+    """the film as a list of (kind, take, k, blend): blend = (take, k) of the previous take crossfading out"""
     frames = []
     for i in range(N_COLD):
         frames.append(('cold', 'carve', COLD_OPEN[1] + i * (COLD_OPEN[2] - COLD_OPEN[1]) // N_COLD, None))
@@ -397,10 +394,10 @@ def plan():
     frames += [('make', None, i, None) for i in range(N_MAKE)]
     frames += [('editor', None, i, None) for i in range(editor_frames())]
     starts = {}
-    for take in ('carve', 'mash'):
+    for n, take in enumerate(ORDER):
         tail = []
-        if take == 'mash':
-            tail = [f[2] for f in frames[-XFADE:]]
+        if n > 0:
+            tail = [(f[1], f[2]) for f in frames[-XFADE:]]
             frames = frames[:-XFADE]
         starts[take] = len(frames)
         j = 0
@@ -419,7 +416,7 @@ def time_map(frames):
         if kind == 'take':
             m.setdefault(take, []).append((k, i / FPS))
             if bk is not None:
-                m.setdefault('carve', []).append((bk, i / FPS))
+                m.setdefault(bk[0], []).append((bk[1], i / FPS))
     for v in m.values():
         v.sort()
     return m
@@ -716,23 +713,24 @@ def build_sound(frames, tm, wav='/tmp/hollow_sound.wav'):
     t_take = min(t for pts in tm.values() for _, t in pts)
     cues['scene'] = (t_take, total - N_END / FPS)
     cues['end'] = (total - N_END / FPS, total - 0.8)
-    take_cues('carve', tm, cues)
+    carve = take_cues('carve', tm, cues)
     n_lit = len(cues['lit'])
-    mash = take_cues('mash', tm, cues)
+    stencils = [take_cues(n, tm, cues) for n in ORDER if n != 'carve']
     carve_lit = cues['lit'][0]
-    # the face starts to wake six seconds of sim time after lighting; in film time that is
-    # where carve frame (light + 180) plays
-    light_k = 481
-    t_wake = dict(tm['carve']).get(light_k + 180 + (light_k + 180) % 2, carve_lit[0] + 5)
+    # the face starts to wake six seconds of sim time after lighting
+    light_f = next(f for f, k, x, y in carve.events if k == 'down' and x > 960 and abs(y - 378) < 30)
+    t_wake = film_time(tm, 'carve', light_f + 360) or carve_lit[0] + 5
     cues['reveal'].append((t_wake, cues['hush'][0] - 0.6))
     for a, b in cues['lit'][n_lit:]:
         cues['soft'].append((a + 0.5, b))
-    # the stencil's knife ticking (it plays at 2x, so tick twice as fast)
-    downs = [f for f, k, x, y in mash.events if k == 'down']
-    t0 = film_time(tm, 'mash', downs[0])
-    if t0 is not None:
-        for i in range(36):
-            cues['sfx'].append((t0 + 0.15 + i * 0.045, 'tick', 0))
+    # the stencils' knife ticking while the script traces (sped up in the cut)
+    for name, take in zip([n for n in ORDER if n != 'carve'], stencils):
+        downs = [f for f, k, x, y in take.events if k == 'down']
+        t0 = film_time(tm, name, downs[0] + 8)
+        t1 = film_time(tm, name, downs[1] - 4) if len(downs) > 1 else None
+        if t0 is not None and t1 is not None:
+            for x in np.arange(t0 + 0.1, t1, 0.05):
+                cues['sfx'].append((x, 'tick', 0))
     for at in (N_COLD / FPS, (N_COLD + N_TITLE) / FPS, (N_COLD + N_TITLE + N_MAKE) / FPS):
         cues['sfx'].append((at - 0.25, 'swish', 0))
     st = soundtrack(total, cues)
@@ -746,8 +744,8 @@ def main():
     global BG, TITLE_BG
     frames_dir, out = sys.argv[1], sys.argv[2]
     BG = vignette_bg()
-    meta = {n: take_meta(frames_dir, n) for n in ('carve', 'mash')}
-    hero = Image.open(os.path.join(frames_dir, 'carve', '00960.png')).convert('RGB')
+    meta = {n: take_meta(frames_dir, n) for n in ORDER}
+    hero = Image.open(os.path.join(frames_dir, 'carve', '00932.png')).convert('RGB')
     TITLE_BG = Image.blend(Image.new('RGB', (W, H), INK),
                            shoot(hero, 1.25, 520, 330)[0].filter(ImageFilter.GaussianBlur(18)), 0.42).convert('RGBA')
     frames, starts = plan()
@@ -766,7 +764,7 @@ def main():
                                 f'scale={W}:{H}:force_original_aspect_ratio=decrease,pad={W}:{H}:(ow-iw)/2:(oh-ih)/2:color=0x0c0a0e,fps={FPS}',
                                 '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-'], stdout=subprocess.PIPE)
     last_frame = None
-    last_mash = max(i for i, f in enumerate(frames) if f[0] == 'take' and f[1] == 'mash')
+    last_take = max(i for i, f in enumerate(frames) if f[0] == 'take')
     for i, (kind, take, k, bk) in enumerate(frames):
         if kind == 'cold':
             z = 1.6 + 0.12 * (i / N_COLD)
@@ -785,13 +783,13 @@ def main():
             img = fade(img, min(1.0, k / 8, (n_ed - k) / 8))
         elif kind == 'take':
             img = take_frame(frames_dir, take, meta[take], k)
-            if take == 'carve' and i - starts['carve'] < 8:
-                img = fade(img, (i - starts['carve']) / 8)
+            if take == ORDER[0] and i - starts[take] < 4:
+                img = fade(img, (i - starts[take]) / 4)
             if bk is not None:
-                m = i - starts['mash']
-                img = Image.blend(take_frame(frames_dir, 'carve', meta['carve'], bk), img, (m + 1) / (XFADE + 1))
-            if take == 'mash' and i > last_mash - 10:
-                img = fade(img, (last_mash - i) / 10)
+                m = i - starts[take]
+                img = Image.blend(take_frame(frames_dir, bk[0], meta[bk[0]], bk[1]), img, (m + 1) / (XFADE + 1))
+            if i > last_take - 10:
+                img = fade(img, (last_take - i) / 10)
         else:
             img = fade(end_card(k), min(1.0, k / 10, (N_END - k) / 12))
         ff.stdin.write(img.convert('RGB').tobytes())

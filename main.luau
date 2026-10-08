@@ -869,12 +869,13 @@ local function readVm(self: Scene)
                 say(self, 'There. Look at what it throws into the dark.')
             end
         else
-            -- snuffed: a curl of smoke out of the lid
-            for k = 1, 14 do
+            -- snuffed: a ribbon of smoke rises from the lid for a couple of seconds
+            -- (vx is the puff's sway phase; the ribbon drifts and curls as it climbs)
+            for k = 1, 40 do
                 table.insert(self.puffs, {
-                    x = PX + (hash(k + self.t) - 0.5) * 40, y = PY - RY + 30,
-                    vx = (hash(k * 3 + self.t) - 0.5) * 30, vy = -40 - hash(k * 7) * 50,
-                    life = -k * 0.09, max = 2.6, r = 10 + hash(k * 5) * 10,
+                    x = PX + 6, y = PY - RY + 34,
+                    vx = k * 0.33, vy = -62 - hash(k * 7) * 14,
+                    life = -k * 0.045, max = 3.0, r = 5 + hash(k * 5) * 3,
                 })
             end
             if self.phantom > 0.3 then
@@ -1126,10 +1127,10 @@ function advance(self: Scene, seconds: number): boolean
         local p = self.puffs[i]
         p.life += dt
         if p.life > 0 then
-            p.x += p.vx * dt + math.sin(p.life * 3 + i) * 12 * dt
+            p.x += (math.sin(p.life * 2.2 + p.vx) * 26 + 9) * dt
             p.y += p.vy * dt
-            p.vy *= 0.99
-            p.r += dt * 14
+            p.vy *= 0.995
+            p.r += dt * 9
         end
         if p.life > p.max then
             table.remove(self.puffs, i)
@@ -1534,6 +1535,17 @@ local function drawCuts(self: Scene, r: Renderer)
     r:restore()
 end
 
+-- the smoke, lit by the moon: drawn into the emission so it reads in the dark
+local function drawSmokeLight(self: Scene, r: Renderer)
+    for _, p in self.puffs do
+        if p.life > 0 then
+            local u = clamp01(p.life / p.max)
+            local a = math.min(1, p.life * 4) * (1 - u) ^ 1.3 * 0.42
+            soft(self, r, p.x, p.y, p.r * 1.6, p.r * 1.3, { 150, 165, 200 }, a)
+        end
+    end
+end
+
 local function drawEmit(self: Scene, r: Renderer)
     local paint = self.paint
     local wx, wy, ww, wh = 70, 150, 190, 330
@@ -1567,6 +1579,7 @@ local function drawEmit(self: Scene, r: Renderer)
     -- mullions and frame
     fill(self, r, rect(wx + ww / 2 - 5, wy, 10, wh), rgb(0, 0, 0))
     fill(self, r, rect(wx, wy + wh * 0.42, ww, 10), rgb(0, 0, 0))
+    drawSmokeLight(self, r)
     -- once lit, the candle catches the underside of the stem through the lid gap
     local glow = self.litAmt * clamp01(self.flameAmt)
     if glow > 0.01 then
@@ -1582,8 +1595,8 @@ end
 local function drawPuffs(self: Scene, r: Renderer)
     for _, p in self.puffs do
         if p.life > 0 then
-            local a = math.sin(clamp01(p.life / p.max) * math.pi) * 0.55
-            soft(self, r, p.x, p.y, p.r * 1.5, p.r * 1.2, { 170, 168, 176 }, a)
+            local a = math.sin(clamp01(p.life / p.max) * math.pi) * 0.35
+            soft(self, r, p.x, p.y, p.r * 1.4, p.r * 1.2, { 170, 168, 176 }, a)
         end
     end
 end
@@ -1733,13 +1746,16 @@ local function drawWall(self: Scene, r: Renderer)
         end
         return false
     end
-    local function pupil(ec: Pt, ew: number, eh: number)
+    local function pupil(ec: Pt, ew: number, eh: number, clip: Path)
+        r:save()
+        r:clipPath(clip)
         local dx, dy = self.mouse.x - ec.x, self.mouse.y - ec.y
         local d = math.max(1, math.sqrt(dx * dx + dy * dy))
         local reach = math.min(ew * 0.26, d * 0.06)
         local pr = math.max(3, math.min(ew * 0.17, eh * 0.42))
         add.color = rgb(0, 255, 0)
         r:drawPath(ellipse(ec.x + dx / d * reach, ec.y + dy / d * reach * 0.6, pr, pr * math.max(0.25, open)), add)
+        r:restore()
     end
 
     -- a pattern with no eyes of its own (a stencil of stars) dims behind the pair it grows
@@ -1761,13 +1777,14 @@ local function drawWall(self: Scene, r: Renderer)
                 local eh = (mxy - mny) * open * narrow
                 local shape = head(squash(w, wc, 1 + 0.06 * ph, open * narrow))
                 add.color = rgb(0, 0, 255)
-                r:drawPath(polyPath(cw(shape), true), add)
+                local eyePath = polyPath(cw(shape), true)
+                r:drawPath(eyePath, add)
                 local hc = head({ wc })[1]
                 local slot = if hc.x < C.x then 1 else 3
                 self.eyes[slot] = math.floor(hc.x)
                 self.eyes[slot + 1] = math.floor(hc.y)
                 if open > 0.3 then
-                    pupil(hc, ew, eh)
+                    pupil(hc, ew, eh, eyePath)
                 end
             elseif lit then
                 local grin = c == mouth
@@ -1828,13 +1845,14 @@ local function drawWall(self: Scene, r: Renderer)
             bez(e, e[1], pt(ec.x - ew * 0.5, ec.y - eh * 1.6), pt(ec.x + ew * 0.5, ec.y - eh * 1.6), pt(ec.x + ew, ec.y), 10)
             bez(e, pt(ec.x + ew, ec.y), pt(ec.x + ew * 0.5, ec.y + eh * 1.2), pt(ec.x - ew * 0.5, ec.y + eh * 1.2), pt(ec.x - ew, ec.y), 10)
             add.color = rgb(0, 0, 255)
-            r:drawPath(polyPath(cw(head(e)), true), add)
+            local eyePath = polyPath(cw(head(e)), true)
+            r:drawPath(eyePath, add)
             local hc = head({ ec })[1]
             local slot = if side < 0 then 1 else 3
             self.eyes[slot] = math.floor(hc.x)
             self.eyes[slot + 1] = math.floor(hc.y)
             if open > 0.3 then
-                pupil(hc, ew * 2, eh * 2)
+                pupil(hc, ew * 2, eh * 2, eyePath)
             end
         end
     end

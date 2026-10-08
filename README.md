@@ -13,7 +13,7 @@ You carve a pumpkin with the pointer. A closed cut pops the piece out, and it tu
 | ![Carving by moonlight](media/hollow-carving.png) | ![The mashrabiya stencil, lit](media/hollow-mashrabiya.png) |
 | ![Snuffed: the eyes stay](media/hollow-snuffed.png) | ![The ghoul stencil: cut and etched](media/hollow-ghoul.png) |
 
-Video (57 s, 1600×1000, synthesised sound, no voice): [media/hollow.mp4](media/hollow.mp4) · page: https://taktek.io/hollow/ (https://taktekhq.github.io/hollow/ redirects there)
+Video (60 s, 1600×1000, synthesised sound, no voice): [media/hollow.mp4](media/hollow.mp4) · page: https://taktek.io/hollow/ (https://taktekhq.github.io/hollow/ redirects there)
 
 ## What it does
 

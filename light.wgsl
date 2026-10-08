@@ -152,8 +152,9 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     // etched skin: paler flesh in the moon, glowing amber once lit
     // shaved flesh is cream-yellow (#E9C27A) in the moon, and glows once lit
     let flesh = vec3<f32>(0.91, 0.76, 0.48);
-    let etchCol = flesh * (0.22 + 0.25 * beam) * (1.0 - 0.6 * L) + vec3<f32>(0.03, 0.035, 0.05) * (1.0 - L)
-        + vec3<f32>(1.0, 0.62, 0.22) * F * (0.42 + 0.3 * near);
+    // thin flesh: cream-yellow in the moon; once lit it glows amber, as bright as the flame allows
+    let etchCol = flesh * (0.22 + 0.25 * beam) * (1.0 - L) + vec3<f32>(0.03, 0.035, 0.05) * (1.0 - L)
+        + vec3<f32>(1.0, 0.48, 0.10) * F * (0.85 + 0.6 * near);
     col = mix(col, etchCol, etch * body);
 
     // through the holes: the inside of the pumpkin, the candle, the flame
@@ -169,7 +170,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     let fibre = 0.94 + 0.12 * fbm(vec2<f32>(px.x / (s * 9.0), px.y / (s * 40.0)));
     // the brightest thing in the room: the lit back wall, falling off from the flame
     let wallHot = mix(vec3<f32>(0.9, 0.45, 0.12), vec3<f32>(1.0, 0.82, 0.5), wallFall);
-    interior = interior + wallHot * F * (0.8 + 1.4 * wallFall) * ribs * fibre;
+    interior = interior + wallHot * F * (1.4 + 2.2 * wallFall) * ribs * fibre;
     // inside the lid it stays darker
     interior = interior * (1.0 - 0.45 * smoothstep(-0.2, -0.75, rel.y) * (1.0 - wallFall));
     // the candle: a stub of wax under the flame, lit from the top, rounder at the sides
@@ -208,8 +209,10 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     let edgeN = max(max(textureSample(maskTex, samp, uv + vec2<f32>(e.x, 0.0)).r, textureSample(maskTex, samp, uv - vec2<f32>(e.x, 0.0)).r),
                     max(textureSample(maskTex, samp, uv + vec2<f32>(0.0, e.y)).r, textureSample(maskTex, samp, uv - vec2<f32>(0.0, e.y)).r));
     let band = clamp(edgeN - cut, 0.0, 1.0) * body;
-    let bandCol = flesh * (ambient * 0.9 + vec3<f32>(0.05)) + vec3<f32>(1.0, 0.72, 0.36) * F * 0.75;
-    col = mix(col, bandCol, band);
+    let bandCol = flesh * (ambient * 0.9 + vec3<f32>(0.05)) * (1.0 - L) + vec3<f32>(1.0, 0.58, 0.22) * F * 1.2;
+    col = mix(col, bandCol, band * mix(0.85, 0.55, L));
+    // bloom: the bright holes spill 10-20 px of warm light onto the rind around them
+    col = col + body * (1.0 - cut) * vec3<f32>(1.0, 0.62, 0.25) * (near * 1.1 + wide * 0.35) * F * 0.55;
 
     // moonlight catches the pumpkin's edge that faces the window
     let toWindow = normalize(vec2<f32>(-1.0, -0.55));
@@ -257,7 +260,11 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     let litWall = Fw * (wt.r * (1.0 - ph * (1.0 - u.slide)) + wt.b * ph);
     let selfWall = ph * wt.b * (1.0 - min(Fw, 1.0)) * 0.9;
     let wallShape = clamp((litWall + selfWall) * dark, 0.0, 1.6);
-    let wallOn = (1.0 - body) * glass;
+    // never over the window and the moon (design units: the window is x 60..270, y 140..490)
+    let dpx = px / s;
+    let winBox = smoothstep(40.0, 70.0, dpx.x) * (1.0 - smoothstep(262.0, 292.0, dpx.x))
+        * smoothstep(120.0, 150.0, dpx.y) * (1.0 - smoothstep(482.0, 512.0, dpx.y));
+    let wallOn = (1.0 - body) * glass * (1.0 - 0.9 * winBox);
     // the room around it goes darker while it watches, so it stands out
     col = col * (1.0 - 0.28 * ph * wallOn);
     let wallCol = mix(vec3<f32>(1.0, 0.62, 0.26), vec3<f32>(0.86, 0.95, 0.62), 0.35 * ph * (1.0 - min(Fw, 1.0)) + 0.12 * ph);
@@ -270,7 +277,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
 
     // vignette, deeper by candlelight
     let v = length((uv - vec2<f32>(0.42, 0.52)) * vec2<f32>(1.0, 0.85));
-    col = col * mix(1.0, smoothstep(1.0, 0.2, v), 0.35 + 0.5 * L);
+    col = col * mix(mix(1.0, smoothstep(1.0, 0.2, v), 0.35 + 0.5 * L), 1.0, cut * 0.85);
 
     // grain
     let gr = hash2(px + vec2<f32>(fract(t * 13.0) * 100.0, fract(t * 7.0) * 100.0)) - 0.5;

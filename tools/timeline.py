@@ -125,14 +125,14 @@ def take_carve():
     t.path([(378, 356), (408, 336), (456, 352)], 0.7).wait(0.15)
     t.path([(552, 352), (606, 328), (648, 342)], 0.7).wait(0.3)
     t.click(1057, 102).wait(0.2)
-    # light it
-    t.click(1108, 378).wait(0.4)
-    t.glide(760, 470, 1.4, arc=0.2).wait(0.5)
+    # light it, and give it more haze and more flame straight away (the panel is
+    # still up; it steps back once the pointer leaves for the room)
+    t.click(1108, 378).wait(0.3)
+    t.drag_slider(1130, 1205, 560, 0.9).wait(0.15)
+    t.drag_slider(1172, 1216, 492, 0.5).wait(0.2)
+    t.glide(760, 470, 1.2, arc=0.2).wait(0.4)
     # a hand passing by: the flame leans
     t.glide(640, 300, 0.9, arc=0.3).glide(820, 360, 0.8).wait(0.3)
-    # more haze, more flame
-    t.drag_slider(1130, 1205, 560, 1.1).wait(0.2)
-    t.drag_slider(1172, 1216, 492, 0.6).wait(0.4)
     # wait for it; it watches the pointer
     t.glide(860, 250, 1.4, arc=0.1).wait(0.6)
     t.glide(300, 230, 2.2, arc=0.1).wait(0.4)
@@ -174,11 +174,13 @@ TAKES = {'carve': take_carve, 'mash': take_mashrabiya, 'ghoul': take_ghoul}
 # The cut: which take frames (30 fps indices) play, and how fast. (start, end, step):
 # step 2 plays that stretch at double speed, so only every other frame is rendered.
 CUT = {
-    'carve': [(15, 105, 1), (105, 481, 2), (481, 650, 1), (650, 780, 2), (780, 1215, 1)],
-    'mash': [(0, 170, 2), (170, 400, 1)],
+    'carve': [(0, 105, 1), (105, 305, 2), (305, 360, 1), (360, 512, 2), (512, 540, 1), (540, 610, 2), (610, 1190, 1)],
+    'ghoul': [(24, 178, 3), (178, 270, 1)],
+    'mash': [(0, 190, 2), (190, 320, 1)],
 }
-COLD_OPEN = ('carve', 900, 975)   # the eyes turning, pushed in on the wall
-STILLS = {'carve': [960, 330, 1195], 'mash': [440], 'ghoul': [290]}
+ORDER = ['carve', 'ghoul', 'mash']
+COLD_OPEN = ('carve', 872, 947)   # the face on the wall, its eyes following the pointer
+STILLS = {'carve': [932, 330, 1168], 'mash': [300], 'ghoul': [250]}
 
 
 def cut_frames(take):
