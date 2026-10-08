@@ -113,7 +113,7 @@ footer p { margin: 6px 0; }
     <p class="label">How it's built</p>
     <h2>Three text files and the Rive CLI</h2>
     <table class="files">
-      <tr><td>scene.rml</td><td>The artboard markup: the words, the control panel, a view model and two state-machine layers (the tool pill slides with a hand-tuned overshoot, and the candle button crossfades). Click listeners write the view model.</td></tr>
+      <tr><td>scene.rml</td><td>The artboard markup: the words, the control panel, a view model and three state-machine layers (the title rises in, the tool pill slides with a hand-tuned overshoot, the candle button crossfades). Click listeners write the view model.</td></tr>
       <tr><td>main.luau</td><td>A scripted layout that owns the room. It handles pointer carving, stencil jobs, falling pieces, the candle, the gust and the ghost. Every frame it draws five offscreen canvases and hands them to the shader.</td></tr>
       <tr><td>light.wgsl</td><td>One GPU Canvas pass: moonlight, glow through the cuts, warmth in the rind, the flame seen through the holes, a ray march toward the flame, your carving projected into the haze, and the thing on the wall.</td></tr>
     </table>
