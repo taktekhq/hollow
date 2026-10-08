@@ -31,6 +31,11 @@ P = {  # view model properties
     'flame': '0:905', 'haze': '0:906', 'escape': '0:907', 'escapeText': '0:908',
     'flameText': '0:909', 'hazeText': '0:910', 'caption': '0:911', 'quality': '0:912',
     'haloX': '0:913', 'haloY': '0:914', 'haloW': '0:915', 'haloH': '0:916', 'haloOn': '0:917', 'haloPress': '0:918',
+    'chrome': '0:919', 'titleOn': '0:938',
+    # written by the script for an Editor-made ghost layer: state 0 hidden, 1 emerging,
+    # 2 watching, 3 hiding (gust), 4 lingering (snuffed); look -1..1; eye centres in artboard units
+    'ghostState': '0:930', 'phantom': '0:931', 'lookX': '0:932', 'lookY': '0:933',
+    'eyeLX': '0:934', 'eyeLY': '0:935', 'eyeRX': '0:936', 'eyeRY': '0:937',
 }
 
 # panel geometry (design units); the sliders are mirrored in main.luau
@@ -128,8 +133,18 @@ add = children.append
 
 # caption and title, on top of everything
 add(text('Caption', 56, 732, 'Draw with the knife.', 'display', 30, CREAM, bound='caption', width=880))
-add(text('Title', 52, 18, 'Hollow', 'display', 78, CREAM, node_id=TITLE))
-add(text('Subtitle', 58, 112, "CARVE IT  ·  LIGHT IT  ·  DON'T TRUST WHAT IT CASTS", 'mono', 11, MUTED, spacing=2.4, node_id=SUBTITLE))
+# the title steps back with the panel while the wall has something to show, and stays
+# out of the way while the eyes linger after the snuff
+add(f'''        <Node x="0" y="0" name="Title Group" id="{nid()}">
+            {bind('titleOn', 18)}
+''' + text('Title', 52, 18, 'Hollow', 'display', 78, CREAM, node_id=TITLE) + '\n'
+    + text('Subtitle', 58, 112, "CARVE IT  ·  LIGHT IT  ·  DON'T TRUST WHAT IT CASTS", 'mono', 11, MUTED, spacing=2.4, node_id=SUBTITLE) + '''
+        </Node>''')
+
+# everything from here to the panel glass sits in one group whose opacity the
+# script drives ('chrome'): the panel steps back while the candle burns and the
+# pointer is out in the room, and comes back as soon as the pointer heads for it
+PANEL_START = len(children)
 
 # --- tool
 children += label('Label Tool', 60, 'TOOL')
@@ -216,6 +231,12 @@ add(f'''        <Node x="1108" y="189" name="Hover Halo" id="{nid()}">
 
 # panel glass
 add(rrect('Panel', PX0, 36, PW, 728, 24, fill='D90C0A0E', stroke='1AFFFFFF'))
+panel_items = children[PANEL_START:]
+del children[PANEL_START:]
+add(f'''        <Node x="0" y="0" name="Panel Group" id="{nid()}">
+            {bind('chrome', 18)}
+''' + '\n'.join(panel_items) + '''
+        </Node>''')
 
 # the scripted room, under everything
 add('''        <LayoutComponent width="1280" height="800" styleId="0:11" name="Stage" id="0:10">
@@ -249,7 +270,7 @@ def cond_bool(prop, value):
                         </TransitionViewModelCondition>'''
 
 
-# hand-tuned: the pill overshoots a touch and settles (easeOutBack-ish)
+# tuned against rendered frames: the pill overshoots a touch and settles (easeOutBack-ish)
 PILL_EASE = '<CubicEaseInterpolator x1="0.3" y1="1.45" x2="0.55" y2="1"/>'
 # the candle button breathes in slowly, like a flame catching
 CANDLE_EASE = '<CubicEaseInterpolator x1="0.16" y1="1" x2="0.3" y2="1"/>'
@@ -379,7 +400,9 @@ vm_props = [
     ('String', 'flameText', '80'), ('String', 'hazeText', '60'),
     ('String', 'caption', 'Draw with the knife. Close a shape and the piece falls out.'), ('Number', 'quality', '1'),
     ('Number', 'haloX', '1108'), ('Number', 'haloY', '189'), ('Number', 'haloW', '216'), ('Number', 'haloH', '42'),
-    ('Number', 'haloOn', '0'), ('Number', 'haloPress', '0'),
+    ('Number', 'haloOn', '0'), ('Number', 'haloPress', '0'), ('Number', 'chrome', '1'), ('Number', 'titleOn', '1'),
+    ('Number', 'ghostState', '0'), ('Number', 'phantom', '0'), ('Number', 'lookX', '0'), ('Number', 'lookY', '0'),
+    ('Number', 'eyeLX', '0'), ('Number', 'eyeLY', '0'), ('Number', 'eyeRX', '0'), ('Number', 'eyeRY', '0'),
 ]
 vm_decl = '\n'.join(f'        <ViewModelProperty{t} name="{n}" id="{P[n]}"/>' for t, n, _ in vm_props)
 vm_inst = '\n'.join(f'            <ViewModelInstance{t} propertyValue="{v}" viewModelPropertyId="{P[n]}"/>' for t, n, v in vm_props)

@@ -4,7 +4,8 @@
 --   albedo  what things are made of (wall, table, pumpkin rind, fallen pieces)
 --   mask    what has been carved: R = cut through, G = etched or cut, B = rind
 --   maskLo  the same mask at quarter size, for the glow and the light rays
---   ghost   the thing on the wall that you did not carve (quarter size)
+--   wall    what the candle throws on the wall above the pumpkin: R your
+--           carving, B the same face once it comes alive, G its pupils/teeth
 --   emit    what shines on its own (the window, the moon)
 -- light.wgsl then lights the room with moonlight and the candle inside the
 -- pumpkin: the holes glow, etched skin turns translucent, the rind warms near
@@ -99,6 +100,11 @@ type Scene = {
     phantom: number,
     phantomHold: number,
     blink: number,
+    ghostSlide: number,
+    ghostDir: number,
+    moveDir: number,
+    chrome: number,
+    awayT: number,
     flameSet: number,
     hazeSet: number,
     tool: number,
@@ -118,6 +124,8 @@ type Scene = {
     data: buffer,
     paint: Paint,
     line: Paint,
+    add: Paint,
+    addLine: Paint,
     -- static geometry, pumpkin-local
     lobes: { { path: Path, cx: number, cy: number, w: number, h: number, shade: number } },
     silhouette: Path,
@@ -138,6 +146,11 @@ type Scene = {
     vmHazeText: Property<string>?,
     vmCaption: Property<string>?,
     vmQuality: Property<number>?,
+    vmChrome: Property<number>?,
+    vmTitle: Property<number>?,
+    titleOn: number,
+    vmGhost: { Property<number>? },
+    eyes: { number },
     caption: string,
     -- the hover halo in the panel: spring state, then the view model
     halo: { number }, -- x, y, w, h, vx, vy, vw, vh
@@ -532,6 +545,12 @@ local function bindVm(self: Scene, context: Context)
     self.vmHazeText = vm:getString('hazeText')
     self.vmCaption = vm:getString('caption')
     self.vmQuality = vm:getNumber('quality')
+    self.vmChrome = vm:getNumber('chrome')
+    self.vmTitle = vm:getNumber('titleOn')
+    self.vmGhost = {
+        vm:getNumber('ghostState'), vm:getNumber('phantom'), vm:getNumber('lookX'), vm:getNumber('lookY'),
+        vm:getNumber('eyeLX'), vm:getNumber('eyeLY'), vm:getNumber('eyeRX'), vm:getNumber('eyeRY'),
+    }
     self.vmHalo = {
         vm:getNumber('haloX'), vm:getNumber('haloY'), vm:getNumber('haloW'), vm:getNumber('haloH'),
         vm:getNumber('haloOn'), vm:getNumber('haloPress'),
@@ -559,7 +578,7 @@ local function rebuild(self: Scene)
     local mask = ctx:canvas({ width = w, height = h })
     local emit = ctx:canvas({ width = w, height = h })
     local maskLo = ctx:canvas({ width = lw, height = lh })
-    local ghost = ctx:canvas({ width = math.max(1, math.floor(w / 2)), height = math.max(1, math.floor(h / 2)) })
+    local ghost = ctx:canvas({ width = w, height = h })
     self.albedo = albedo
     self.mask = mask
     self.emit = emit
@@ -785,6 +804,9 @@ function pointerMove(self: Scene, event: PointerEvent)
         local d = math.sqrt((p.x - self.lastMx) ^ 2 + (p.y - self.lastMy) ^ 2)
         local v = d / dt
         self.speed = math.max(self.speed * 0.5, v)
+        if v > 1500 then
+            self.moveDir = if p.x > self.lastMx then 1 else -1
+        end
         -- a hand swept past the pumpkin: the flame leans away from it
         local near = math.sqrt((p.x - PX) ^ 2 + (p.y - PY) ^ 2)
         if near < 420 then
@@ -973,8 +995,9 @@ function advance(self: Scene, seconds: number): boolean
         local near = math.sqrt((self.mouse.x - PX) ^ 2 + (self.mouse.y - PY) ^ 2)
         if near < 340 and self.gust < 0.3 then
             self.gust = 1
+            self.ghostDir = self.moveDir
             if self.phantom > 0.5 then
-                say(self, 'Easy. It does not like the dark either.')
+                say(self, 'It slid out of the light. It will be back.')
             else
                 say(self, 'Careful. One breath and it is out.')
             end
@@ -989,19 +1012,73 @@ function advance(self: Scene, seconds: number): boolean
     self.lean = math.max(-1, math.min(1, self.lean))
 
     -- the thing on the wall
-    local wantPhantom = self.lit and self.litT > 6 and self.holes >= 2 and self.gust < 0.2
+    local wantPhantom = self.lit and self.litT > 6 and self.holes >= 2 and self.gust < 0.2 and self.ghostSlide == 0
     if wantPhantom then
         if self.phantom < 0.05 and self.story < 3 then
             self.story = 3
-            say(self, 'Wait. You did not carve that.')
+            say(self, 'Wait. That is not the face you carved.')
         end
         self.phantom = math.min(1, self.phantom + dt * 0.45)
     elseif self.phantomHold > 0 then
         self.phantomHold -= dt
     else
-        self.phantom = math.max(0, self.phantom - dt * (if self.gust > 0.2 then 2.2 else 0.9))
+        self.phantom = math.max(0, self.phantom - dt * (if self.gust > 0.2 then 0.8 else 0.9))
+    end
+    -- a gust sends it sliding out of the light; once it has gone it lets go,
+    -- and only then can it creep back in where it was
+    if (self.gust > 0.2 and self.phantom > 0.05) or (self.ghostSlide > 0 and self.ghostSlide < 1) then
+        self.ghostSlide = math.min(1, self.ghostSlide + dt * 1.7)
+    end
+    if self.ghostSlide >= 1 then
+        self.phantom = math.max(0, self.phantom - dt * 2.5)
+        if self.phantom < 0.03 then
+            self.ghostSlide = 0
+        end
     end
     self.blink += dt
+
+    -- the panel steps back while the candle burns and the pointer is out in the
+    -- room; it comes back the moment the pointer heads for it
+    if self.mouse.x < 930 then
+        self.awayT += dt
+    else
+        self.awayT = 0
+    end
+    local wantChrome = if self.lit and self.litT > 2.5 and self.awayT > 1.0 then 0 else 1
+    self.chrome += (wantChrome - self.chrome) * (1 - math.exp(-dt * (if wantChrome > self.chrome then 10 else 2.5)))
+    local vc = self.vmChrome
+    if vc ~= nil then
+        vc.value = math.floor(self.chrome * 1000 + 0.5) / 1000
+    end
+    -- the title also keeps out of the way of the eyes that linger after the snuff
+    local wantTitle = if not self.lit and self.phantom > 0.05 then 0 else self.chrome
+    self.titleOn += (wantTitle - self.titleOn) * (1 - math.exp(-dt * 6))
+    local vt2 = self.vmTitle
+    if vt2 ~= nil then
+        vt2.value = math.floor(self.titleOn * 1000 + 0.5) / 1000
+    end
+    -- the ghost's state for anything made in the Editor to bind to
+    local state = 0
+    if self.ghostSlide > 0 then
+        state = 3
+    elseif not self.lit and self.phantom > 0.02 then
+        state = 4
+    elseif self.phantom >= 0.98 then
+        state = 2
+    elseif self.phantom > 0.02 then
+        state = 1
+    end
+    local ex = (self.eyes[1] + self.eyes[3]) / 2
+    local ey = (self.eyes[2] + self.eyes[4]) / 2
+    local ghostVals = { state, math.floor(self.phantom * 1000) / 1000,
+        math.max(-1, math.min(1, (self.mouse.x - ex) / 400)), math.max(-1, math.min(1, (self.mouse.y - ey) / 300)),
+        self.eyes[1], self.eyes[2], self.eyes[3], self.eyes[4] }
+    for i, v in ghostVals do
+        local pr = self.vmGhost[i]
+        if pr ~= nil and pr.value ~= v then
+            pr.value = v
+        end
+    end
 
     -- the knife eases toward the pointer, or rides the stencil
     local goal = self.mouse
@@ -1398,8 +1475,9 @@ local function drawCuts(self: Scene, r: Renderer)
     local live = self.stroke
     r:save()
     pumpkinXf(self, r)
-    -- rind
+    -- rind (and the stem, so the light on the wall stays behind it)
     fill(self, r, self.silhouette, rgb(0, 0, 255))
+    fill(self, r, self.stem, rgb(0, 0, 255))
     -- the lid gap: a hairline of light when lit
     self.line.color = rgb(0, 255, 255)
     self.line.thickness = 2.2
@@ -1489,6 +1567,16 @@ local function drawEmit(self: Scene, r: Renderer)
     -- mullions and frame
     fill(self, r, rect(wx + ww / 2 - 5, wy, 10, wh), rgb(0, 0, 0))
     fill(self, r, rect(wx, wy + wh * 0.42, ww, 10), rgb(0, 0, 0))
+    -- once lit, the candle catches the underside of the stem through the lid gap
+    local glow = self.litAmt * clamp01(self.flameAmt)
+    if glow > 0.01 then
+        r:save()
+        pumpkinXf(self, r)
+        self.line.color = Color.rgba(240, 140, 60, math.floor(90 * glow))
+        self.line.thickness = 2
+        r:drawPath(self.stem, self.line)
+        r:restore()
+    end
 end
 
 local function drawPuffs(self: Scene, r: Renderer)
@@ -1500,36 +1588,256 @@ local function drawPuffs(self: Scene, r: Renderer)
     end
 end
 
-local function drawGhost(self: Scene, r: Renderer)
-    if self.phantom <= 0.001 then
+-- where the bottom of the thrown face lands on the wall (just behind the lid)
+local WALL_Y = 286
+
+local function centroid(pts: { Pt }): Pt
+    local cx, cy = 0, 0
+    for _, p in pts do
+        cx += p.x
+        cy += p.y
+    end
+    return pt(cx / #pts, cy / #pts)
+end
+
+-- scale a polygon about its centre
+local function squash(pts: { Pt }, c: Pt, sx: number, sy: number): { Pt }
+    local out = {}
+    for _, p in pts do
+        table.insert(out, pt(c.x + (p.x - c.x) * sx, c.y + (p.y - c.y) * sy))
+    end
+    return out
+end
+
+-- What the candle throws on the wall above the pumpkin. R: your carving, as a
+-- hard-edged picture of light. B: the same face once it comes alive (its eyes
+-- narrow and blink, the grin widens and grows teeth, the head tilts, and a gust
+-- slides it out of the light). G: what is dark inside it, the pupils that
+-- follow the pointer and the teeth.
+local function drawWall(self: Scene, r: Renderer)
+    if self.litAmt <= 0.001 and self.phantom <= 0.001 then
         return
     end
-    -- two slanted eyes and a long smile, high on the wall, looking at you
-    local cx = PX
-    local cy = 166
-    local look = clamp01((self.mouse.x - 200) / 900) * 2 - 1
-    local lookY = clamp01((self.mouse.y - 100) / 600) * 2 - 1
-    local b = self.blink % 4.3
-    local open = if b < 0.16 then math.abs(b - 0.08) / 0.08 else 1
-    for side = -1, 1, 2 do
-        local ex = cx + side * 96
-        local hh = 26 * open
-        local e = { pt(ex - 62 * side, cy + 12) }
-        bez(e, e[1], pt(ex - 30 * side, cy - hh - 6), pt(ex + 30 * side, cy - hh - 12), pt(ex + 58 * side, cy - 22), 10)
-        bez(e, pt(ex + 58 * side, cy - 22), pt(ex + 30 * side, cy + hh * 0.6), pt(ex - 20 * side, cy + hh * 0.8 + 6), pt(ex - 62 * side, cy + 12), 10)
-        fill(self, r, polyPath(cw(e), true), rgb(255, 255, 255))
-        -- the pupil: a slit that follows the pointer
-        if open > 0.4 then
-            local px = ex + look * 22
-            local py = cy - 6 + lookY * 6
-            fill(self, r, ellipse(px, py, 5, 15 * open), rgb(0, 0, 0))
+    local minx, miny, maxx, maxy = 1e9, 1e9, -1e9, -1e9
+    local any = false
+    for _, c in self.cuts do
+        if c.kind == 'hole' or c.kind == 'slit' then
+            for _, p in c.pts do
+                minx = math.min(minx, p.x)
+                maxx = math.max(maxx, p.x)
+                miny = math.min(miny, p.y)
+                maxy = math.max(maxy, p.y)
+            end
+            any = true
         end
     end
-    local mo = { pt(cx - 160, cy + 60) }
-    bez(mo, mo[1], pt(cx - 80, cy + 132), pt(cx + 80, cy + 132), pt(cx + 160, cy + 60), 16)
-    bez(mo, pt(cx + 160, cy + 60), pt(cx + 80, cy + 110), pt(cx - 80, cy + 110), pt(cx - 160, cy + 60), 16)
-    local m = polyPath(cw(mo), true)
-    fill(self, r, m, rgb(255, 255, 255))
+    if not any then
+        return
+    end
+    local bw = math.max(40, maxx - minx)
+    local bh = math.max(40, maxy - miny)
+    -- as large as the wall above the pumpkin allows
+    local S = math.max(0.8, math.min(1.6, 236 / bh, 640 / bw))
+    local bcx = (minx + maxx) / 2
+    local function wall(pts: { Pt }): { Pt }
+        local out = {}
+        for _, p in pts do
+            table.insert(out, pt(PX + (p.x - bcx) * S, WALL_Y - (maxy - p.y) * S))
+        end
+        return out
+    end
+    local add = self.add
+    local addLine = self.addLine
+    local lit = self.litAmt > 0.001
+
+    -- R: the carving, as the light throws it
+    if lit then
+        add.color = rgb(255, 0, 0)
+        addLine.color = rgb(255, 0, 0)
+        addLine.thickness = 4 * S
+        for _, c in self.cuts do
+            if c.kind == 'hole' then
+                r:drawPath(polyPath(wall(c.pts), true), add)
+            elseif c.kind == 'slit' then
+                r:drawPath(polyPath(wall(c.pts), false), addLine)
+            end
+        end
+        add.color = rgb(70, 0, 0)
+        addLine.color = rgb(70, 0, 0)
+        addLine.thickness = 22 * S
+        for _, c in self.cuts do
+            if c.kind == 'etch' then
+                r:drawPath(polyPath(wall(c.pts), false), addLine)
+            elseif c.kind == 'etchfill' then
+                r:drawPath(polyPath(wall(c.pts), true), add)
+            end
+        end
+    end
+
+    local ph = self.phantom
+    if ph <= 0.001 then
+        return
+    end
+    -- which holes are its eyes and its mouth
+    local eyes: { Cut } = {}
+    local mouth: Cut? = nil
+    local holeCount = 0
+    for _, c in self.cuts do
+        if c.kind == 'hole' then
+            holeCount += 1
+        end
+    end
+    if holeCount <= 10 then
+        local upper: { Cut } = {}
+        for _, c in self.cuts do
+            if c.kind == 'hole' then
+                local ce = centroid(c.pts)
+                if ce.y < FY - 10 then
+                    table.insert(upper, c)
+                elseif ce.y > FY + 10 and (mouth == nil or c.area > (mouth :: Cut).area) then
+                    mouth = c
+                end
+            end
+        end
+        table.sort(upper, function(a: Cut, b: Cut): boolean
+            return a.area > b.area
+        end)
+        for i = 1, math.min(2, #upper) do
+            table.insert(eyes, upper[i])
+        end
+    end
+
+    local C = pt(PX, WALL_Y - (maxy - (miny + maxy) / 2) * S)
+    local tilt = (math.sin(self.t * 0.42) * 0.07 + math.sin(self.t * 0.17 + 1) * 0.03) * ph
+    local sl = self.ghostSlide
+    local slide = sl * sl * 520 * self.ghostDir
+    local bob = math.sin(self.t * 0.8) * 4 * ph
+    local cs, sn = math.cos(tilt), math.sin(tilt)
+    local function head(pts: { Pt }): { Pt }
+        local out = {}
+        for _, p in pts do
+            local dx, dy = p.x - C.x, p.y - C.y
+            table.insert(out, pt(C.x + dx * cs - dy * sn + slide, C.y + dx * sn + dy * cs + bob))
+        end
+        return out
+    end
+    -- it blinks, and its eyes narrow as it wakes
+    local b = self.blink % 3.6
+    local open = if b < 0.2 then math.abs(b - 0.1) / 0.1 else 1
+    local narrow = 1 - 0.42 * ph
+    local function isEye(c: Cut): boolean
+        for _, e in eyes do
+            if e == c then
+                return true
+            end
+        end
+        return false
+    end
+    local function pupil(ec: Pt, ew: number, eh: number)
+        local dx, dy = self.mouse.x - ec.x, self.mouse.y - ec.y
+        local d = math.max(1, math.sqrt(dx * dx + dy * dy))
+        local reach = math.min(ew * 0.26, d * 0.06)
+        local pr = math.max(3, math.min(ew * 0.17, eh * 0.42))
+        add.color = rgb(0, 255, 0)
+        r:drawPath(ellipse(ec.x + dx / d * reach, ec.y + dy / d * reach * 0.6, pr, pr * math.max(0.25, open)), add)
+    end
+
+    -- a pattern with no eyes of its own (a stencil of stars) dims behind the pair it grows
+    local rest = if #eyes == 0 then rgb(0, 0, 110) else rgb(0, 0, 255)
+    for _, c in self.cuts do
+        if c.kind == 'hole' then
+            local w = wall(c.pts)
+            local wc = centroid(w)
+            if isEye(c) then
+                local ew = (c.area / math.max(1, bh)) -- rough size, refined below
+                local mnx, mxx, mny, mxy = 1e9, -1e9, 1e9, -1e9
+                for _, p in w do
+                    mnx = math.min(mnx, p.x)
+                    mxx = math.max(mxx, p.x)
+                    mny = math.min(mny, p.y)
+                    mxy = math.max(mxy, p.y)
+                end
+                ew = mxx - mnx
+                local eh = (mxy - mny) * open * narrow
+                local shape = head(squash(w, wc, 1 + 0.06 * ph, open * narrow))
+                add.color = rgb(0, 0, 255)
+                r:drawPath(polyPath(cw(shape), true), add)
+                local hc = head({ wc })[1]
+                local slot = if hc.x < C.x then 1 else 3
+                self.eyes[slot] = math.floor(hc.x)
+                self.eyes[slot + 1] = math.floor(hc.y)
+                if open > 0.3 then
+                    pupil(hc, ew, eh)
+                end
+            elseif lit then
+                local grin = c == mouth
+                local shape = if grin then head(squash(w, wc, 1 + 0.16 * ph, 1 + 0.34 * ph)) else head(w)
+                add.color = rest
+                local mp = polyPath(cw(shape), true)
+                r:drawPath(mp, add)
+                if grin then
+                    -- teeth, clipped to the grin
+                    local mnx, mxx, mny, mxy = 1e9, -1e9, 1e9, -1e9
+                    for _, p in shape do
+                        mnx = math.min(mnx, p.x)
+                        mxx = math.max(mxx, p.x)
+                        mny = math.min(mny, p.y)
+                        mxy = math.max(mxy, p.y)
+                    end
+                    local th = (mxy - mny) * 0.36 * ph
+                    r:save()
+                    r:clipPath(mp)
+                    add.color = rgb(0, 255, 0)
+                    -- thin fangs with light between them, hanging from the top and rising from the bottom
+                    local n = 6
+                    local tw = (mxx - mnx) / n
+                    for k = 0, n - 1 do
+                        local x0 = mnx + (k + 0.5) * tw
+                        local fw = tw * 0.22
+                        local top = Path.new()
+                        top:moveTo(Vector.xy(x0 - fw, mny - 30))
+                        top:lineTo(Vector.xy(x0 + fw, mny - 30))
+                        top:lineTo(Vector.xy(x0, mny + th + 20))
+                        top:close()
+                        r:drawPath(top, add)
+                        if k > 0 then
+                            local bx = mnx + k * tw
+                            local bot = Path.new()
+                            bot:moveTo(Vector.xy(bx - fw * 0.8, mxy + 30))
+                            bot:lineTo(Vector.xy(bx + fw * 0.8, mxy + 30))
+                            bot:lineTo(Vector.xy(bx, mxy - th * 0.7 - 14))
+                            bot:close()
+                            r:drawPath(bot, add)
+                        end
+                    end
+                    r:restore()
+                end
+            end
+        elseif c.kind == 'slit' and lit then
+            addLine.color = rgb(0, 0, 255)
+            addLine.thickness = 4 * S
+            r:drawPath(polyPath(head(wall(c.pts)), false), addLine)
+        end
+    end
+    -- a pattern with no eyes of its own grows a pair
+    if #eyes == 0 then
+        for side = -1, 1, 2 do
+            local ec = pt(C.x + side * bw * S * 0.2, C.y - bh * S * 0.18)
+            local ew, eh = bw * S * 0.17, bh * S * 0.11 * open * narrow
+            local e = { pt(ec.x - ew, ec.y) }
+            bez(e, e[1], pt(ec.x - ew * 0.5, ec.y - eh * 1.6), pt(ec.x + ew * 0.5, ec.y - eh * 1.6), pt(ec.x + ew, ec.y), 10)
+            bez(e, pt(ec.x + ew, ec.y), pt(ec.x + ew * 0.5, ec.y + eh * 1.2), pt(ec.x - ew * 0.5, ec.y + eh * 1.2), pt(ec.x - ew, ec.y), 10)
+            add.color = rgb(0, 0, 255)
+            r:drawPath(polyPath(cw(head(e)), true), add)
+            local hc = head({ ec })[1]
+            local slot = if side < 0 then 1 else 3
+            self.eyes[slot] = math.floor(hc.x)
+            self.eyes[slot + 1] = math.floor(hc.y)
+            if open > 0.3 then
+                pupil(hc, ew * 2, eh * 2)
+            end
+        end
+    end
 end
 
 function draw(self: Scene, renderer: Renderer)
@@ -1580,8 +1888,8 @@ function draw(self: Scene, renderer: Renderer)
 
     local rg = ghost:beginFrame({ clearColor = Color.rgba(0, 0, 0, 255) })
     rg:save()
-    rg:transform(Mat2D.values(s * q / 2, 0, 0, s * q / 2, ox * q / 2, oy * q / 2))
-    drawGhost(self, rg)
+    rg:transform(xf)
+    drawWall(self, rg)
     rg:restore()
     ghost:endFrame()
 
@@ -1618,7 +1926,7 @@ function draw(self: Scene, renderer: Renderer)
     buffer.writef32(d, 60, self.gust)
     buffer.writef32(d, 64, self.open)
     buffer.writef32(d, 68, self.flameAmt)
-    buffer.writef32(d, 72, 0)
+    buffer.writef32(d, 72, self.ghostSlide)
     buffer.writef32(d, 76, 0)
     ubo:write(d)
 
@@ -1672,6 +1980,11 @@ return function(context: Context): Layout<Scene>
         phantom = 0,
         phantomHold = 0,
         blink = 0,
+        ghostSlide = 0,
+        ghostDir = -1,
+        moveDir = -1,
+        chrome = 1,
+        awayT = 0,
         flameSet = 80,
         hazeSet = 60,
         tool = 0,
@@ -1690,6 +2003,8 @@ return function(context: Context): Layout<Scene>
         data = buffer.create(112),
         paint = Paint.with({ color = Color.rgb(255, 255, 255) }),
         line = Paint.with({ style = 'stroke', thickness = 2, color = Color.rgb(0, 0, 0), cap = 'round', join = 'round' }),
+        add = Paint.with({ color = Color.rgb(255, 0, 0), blendMode = 'additive' }),
+        addLine = Paint.with({ style = 'stroke', thickness = 4, color = Color.rgb(255, 0, 0), cap = 'round', join = 'round', blendMode = 'additive' }),
         lobes = {},
         silhouette = Path.new(),
         face = Path.new(),
@@ -1708,6 +2023,11 @@ return function(context: Context): Layout<Scene>
         vmHazeText = nil,
         vmCaption = nil,
         vmQuality = nil,
+        vmChrome = nil,
+        vmTitle = nil,
+        titleOn = 1,
+        vmGhost = {},
+        eyes = { 0, 0, 0, 0 },
         caption = '',
         halo = { 1108, 189, 216, 42, 0, 0, 0, 0 },
         haloOn = 0,

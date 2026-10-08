@@ -171,6 +171,25 @@ def take_ghoul():
 
 TAKES = {'carve': take_carve, 'mash': take_mashrabiya, 'ghoul': take_ghoul}
 
+# The cut: which take frames (30 fps indices) play, and how fast. (start, end, step):
+# step 2 plays that stretch at double speed, so only every other frame is rendered.
+CUT = {
+    'carve': [(15, 105, 1), (105, 481, 2), (481, 650, 1), (650, 780, 2), (780, 1215, 1)],
+    'mash': [(0, 170, 2), (170, 400, 1)],
+}
+COLD_OPEN = ('carve', 900, 975)   # the eyes turning, pushed in on the wall
+STILLS = {'carve': [960, 330, 1195], 'mash': [440], 'ghoul': [290]}
+
+
+def cut_frames(take):
+    out = set()
+    for a, b, step in CUT.get(take, []):
+        out.update(range(a, b, step))
+    if COLD_OPEN[0] == take:
+        out.update(range(COLD_OPEN[1], COLD_OPEN[2]))
+    out.update(STILLS.get(take, []))
+    return sorted(out)
+
 if __name__ == '__main__':
     for k, fn in TAKES.items():
         t = fn()

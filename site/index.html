@@ -6,7 +6,7 @@
 <title>Hollow: carve it, light it, don't trust what it casts</title>
 <meta name="description" content="An interactive jack-o'-lantern made with the Rive CLI, Luau scripting and a WGSL GPU Canvas shader, for the Rive Halloween Challenge.">
 <meta property="og:title" content="Hollow: an interactive jack-o'-lantern in Rive">
-<meta property="og:description" content="Carve a pumpkin with your pointer, light it, and watch a WGSL shader throw your carving across the room. Something on the wall looks back.">
+<meta property="og:description" content="Carve a pumpkin with your pointer, light it, and watch a WGSL shader throw your carving across the room. Then the face on the wall looks back.">
 <meta property="og:image" content="https://taktek.io/hollow/media/hero.jpg">
 <meta property="og:url" content="https://taktek.io/hollow/">
 <meta property="og:image:width" content="1600">
@@ -71,7 +71,7 @@ footer p { margin: 6px 0; }
     <p class="label">Rive Halloween Challenge · October 2026</p>
     <h1>Hollow</h1>
     <p class="label">Carve it · Light it · Don't trust what it casts</p>
-    <p class="lede">Carve a pumpkin with your pointer, then light the candle. A WGSL shader lights the room through whatever you cut, and throws your carving across the wall. Leave it lit long enough and the light shows a face you didn't carve.</p>
+    <p class="lede">Carve a pumpkin with your pointer, then light the candle. A WGSL shader lights the room through whatever you cut, and throws your carving onto the wall. Leave it lit long enough and that face stops being the one you carved.</p>
     <div class="actions">
       <a class="btn primary" href="#film">Watch the video</a>
       <a class="btn ghost" href="https://github.com/taktekhq/hollow">Source on GitHub</a>
@@ -81,7 +81,7 @@ footer p { margin: 6px 0; }
         <source src="media/hollow.mp4" type="video/mp4">
       </video>
     </div>
-    <p class="note" style="margin-top:14px">The film: 79 s, sound on. Title, how it's made, then real replayed pointer input: carving, lighting, the thing on the wall, a gust, the snuff, the mashrabiya stencil.</p>
+    <p class="note" style="margin-top:14px">The film: 57 s, sound on. Real replayed pointer input: carving, lighting, the face on the wall waking up, a gust, the snuff, the mashrabiya stencil.</p>
     <p class="note">A playable Rive link will be added here once the file is published with <code>rive --publish=web</code>. Scripted Rive files have to be signed by a logged-in account before a web runtime will run them.</p>
   </div>
 </header>
@@ -94,7 +94,7 @@ footer p { margin: 6px 0; }
       <div><b>Knife</b><p>Drag to cut. Close the shape and the piece pops out and tumbles onto the table. Leave it open for a slit of light.</p></div>
       <div><b>Etch</b><p>Shave the skin instead of cutting through. Once the candle is lit, the thin flesh glows amber.</p></div>
       <div><b>Stencils</b><p>Grin, Ghoul, and Mashrabiya (مشربية), after the carved wooden screens of old Beirut houses. The script carves each one star by star.</p></div>
-      <div><b>Candle</b><p>It catches like a struck match. Sweep past it fast and the flame gutters. Snuff it and the eyes on the wall stay a moment longer.</p></div>
+      <div><b>Candle</b><p>It catches like a struck match. Leave it lit and your face on the wall wakes up. Sweep past it fast and it slides out of the light. Snuff it and the eyes stay.</p></div>
     </div>
   </div>
 </section>
@@ -106,7 +106,7 @@ footer p { margin: 6px 0; }
     <div class="stills">
       <figure><img src="media/hollow-carving.png" alt="An uncarved pumpkin in moonlight with two triangle eyes cut and a knife mid-stroke" loading="lazy"><figcaption>Carving by moonlight. Closed cuts fall onto the table.</figcaption></figure>
       <figure><img src="media/hollow-mashrabiya.png" alt="A pumpkin carved with an eight-point star lattice, lit, throwing stars across the room" loading="lazy"><figcaption>The mashrabiya stencil, lit. Thirty stars thrown into the haze.</figcaption></figure>
-      <figure><img src="media/hollow-snuffed.png" alt="The candle snuffed, the room blue again, two glowing eyes still on the wall" loading="lazy"><figcaption>Snuffed. Smoke from the lid, and it is still looking at you.</figcaption></figure>
+      <figure><img src="media/hollow-snuffed.png" alt="The candle snuffed, the room blue again, two glowing eyes still on the wall" loading="lazy"><figcaption>Snuffed. Smoke from the lid. The eyes stay on the wall.</figcaption></figure>
       <figure><img src="media/hollow-ghoul.png" alt="A ghoul face with etched brows and cheeks glowing amber and a jagged mouth" loading="lazy"><figcaption>The ghoul stencil. Cut eyes and mouth, etched brows and cheeks.</figcaption></figure>
     </div>
   </div>
@@ -117,9 +117,9 @@ footer p { margin: 6px 0; }
     <p class="label">How it's built</p>
     <h2>Three text files and the Rive CLI</h2>
     <table class="files">
-      <tr><td>scene.rml</td><td>The artboard markup: the words, the control panel, a view model and three state-machine layers (the title rises in, the tool pill slides with a hand-tuned overshoot, the candle button crossfades). Click listeners write the view model.</td></tr>
-      <tr><td>main.luau</td><td>A scripted layout that owns the room. It handles pointer carving, stencil jobs, falling pieces, the candle, the gust and the ghost. Every frame it draws five offscreen canvases and hands them to the shader.</td></tr>
-      <tr><td>light.wgsl</td><td>One GPU Canvas pass: moonlight, glow through the cuts, warmth in the rind, the flame seen through the holes, a ray march toward the flame, your carving projected into the haze, and the thing on the wall.</td></tr>
+      <tr><td>scene.rml</td><td>The artboard markup: the words, the control panel, a view model and three state-machine layers (the title rises in, the tool pill slides with a small overshoot, the candle button crossfades). Click listeners write the view model.</td></tr>
+      <tr><td>main.luau</td><td>A scripted layout that owns the room. It handles pointer carving, stencil jobs, falling pieces, the candle, the gust and the face on the wall. Every frame it draws five offscreen canvases and hands them to the shader.</td></tr>
+      <tr><td>light.wgsl</td><td>One GPU Canvas pass: moonlight, glow through the cuts, warmth in the rind, the flame seen through the holes, a ray march toward the flame, and your carving thrown onto the wall, hard-edged, until it comes alive.</td></tr>
     </table>
     <ul class="chips">
       <li>Rive CLI</li><li>RML</li><li>GPU Canvas · WGSL</li><li>Luau scripting</li><li>Data binding</li><li>State machines</li>

@@ -23,7 +23,7 @@ struct U {
     gust: f32,     // 0..1
     open: f32,     // how much of the face is open, 0..1
     flameSize: f32,// the flame's own size (strike overshoot)
-    pad0: f32,
+    slide: f32,   // 0..1, a gust slides the face out of the light
     pad1: f32,
 };
 
@@ -31,7 +31,7 @@ struct U {
 @group(0) @binding(1) var albedoTex: texture_2d<f32>;
 @group(0) @binding(2) var maskTex: texture_2d<f32>;
 @group(0) @binding(3) var maskLoTex: texture_2d<f32>;
-@group(0) @binding(4) var ghostTex: texture_2d<f32>;
+@group(0) @binding(4) var ghostTex: texture_2d<f32>; // the wall: R carving, G dark, B the face alive
 @group(0) @binding(5) var emitTex: texture_2d<f32>;
 @group(0) @binding(6) var samp: sampler;
 
@@ -144,14 +144,16 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     let near = glow(uv, 9.0 * s, rot);
     let wide = glow(uv, 26.0 * s, rot + 1.7);
     let sss = (near * 1.3 + wide * 0.7) * F;
-    col = col + body * (1.0 - cut) * vec3<f32>(1.0, 0.36, 0.05) * sss * 0.95;
+    col = col + body * (1.0 - cut) * vec3<f32>(1.0, 0.36, 0.05) * sss * 0.62;
     // the whole pumpkin warms a little from within
     let inner = 1.0 - smoothstep(0.2, 1.05, length(rel * vec2<f32>(1.0, 1.1)));
     col = col + body * (1.0 - cut) * vec3<f32>(0.62, 0.2, 0.03) * inner * F * 0.36 + body * (1.0 - cut) * vec3<f32>(0.3, 0.09, 0.015) * F * 0.3;
 
     // etched skin: paler flesh in the moon, glowing amber once lit
-    let flesh = vec3<f32>(0.98, 0.78, 0.46);
-    let etchCol = mix(flesh * ambient * 1.1, vec3<f32>(0.0), L * 0.7) + vec3<f32>(1.0, 0.42, 0.08) * F * (0.5 + 0.3 * near);
+    // shaved flesh is cream-yellow (#E9C27A) in the moon, and glows once lit
+    let flesh = vec3<f32>(0.91, 0.76, 0.48);
+    let etchCol = flesh * (0.22 + 0.25 * beam) * (1.0 - 0.6 * L) + vec3<f32>(0.03, 0.035, 0.05) * (1.0 - L)
+        + vec3<f32>(1.0, 0.62, 0.22) * F * (0.42 + 0.3 * near);
     col = mix(col, etchCol, etch * body);
 
     // through the holes: the inside of the pumpkin, the candle, the flame
@@ -165,8 +167,9 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     // with the inner ribs of the pumpkin showing as soft vertical bands
     let ribs = 0.86 + 0.14 * cos(rel.x * 15.7 + 0.6) * (1.0 - abs(rel.x) * 0.5);
     let fibre = 0.94 + 0.12 * fbm(vec2<f32>(px.x / (s * 9.0), px.y / (s * 40.0)));
-    let wallHot = mix(vec3<f32>(0.78, 0.22, 0.03), vec3<f32>(1.0, 0.72, 0.30), wallFall);
-    interior = interior + wallHot * F * (0.30 + 1.45 * wallFall) * ribs * fibre;
+    // the brightest thing in the room: the lit back wall, falling off from the flame
+    let wallHot = mix(vec3<f32>(0.9, 0.45, 0.12), vec3<f32>(1.0, 0.82, 0.5), wallFall);
+    interior = interior + wallHot * F * (0.8 + 1.4 * wallFall) * ribs * fibre;
     // inside the lid it stays darker
     interior = interior * (1.0 - 0.45 * smoothstep(-0.2, -0.75, rel.y) * (1.0 - wallFall));
     // the candle: a stub of wax under the flame, lit from the top, rounder at the sides
@@ -179,6 +182,14 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     let waxIn = (1.0 - smoothstep(cw - 0.8, cw + 0.4, abs(cdx))) * smoothstep(topY - 1.2, topY + 0.3, cdy);
     let waxLight = (0.05 + F * (0.42 + 1.1 * exp(-max(cdy - topY, 0.0) / 40.0))) * (0.45 + 0.55 * cyl + 0.25 * smoothstep(0.2, -0.6, cdx / cw));
     var waxCol = vec3<f32>(1.0, 0.74, 0.42) * waxLight;
+    // a soft highlight down the left of the wax, and a drip running down the front
+    let hl = exp(-pow((cdx / cw + 0.42) / 0.13, 2.0));
+    waxCol = waxCol + vec3<f32>(1.0, 0.9, 0.72) * hl * (0.15 + 0.55 * F * exp(-max(cdy - topY, 0.0) / 50.0));
+    let dripX = cdx - cw * 0.45;
+    let dripLen = topY + 24.0;
+    let drip = (1.0 - smoothstep(2.0, 3.0, abs(dripX))) * step(cdy, dripLen)
+        + (1.0 - smoothstep(3.2, 4.2, length(vec2<f32>(dripX, cdy - dripLen))));
+    waxCol = mix(waxCol, waxCol * 1.35 + vec3<f32>(0.10, 0.06, 0.02) * F, clamp(drip, 0.0, 1.0) * step(topY, cdy));
     // translucent glow at the top where the wax pools around the wick
     waxCol = waxCol + vec3<f32>(1.0, 0.55, 0.15) * F * exp(-max(cdy - topY, 0.0) / 5.0) * 0.8 * cyl;
     interior = mix(interior, waxCol, waxIn);
@@ -188,9 +199,17 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     let fl = flameShape(px, s);
     let core = flameShape(px + vec2<f32>(0.0, -6.0 * s), s * 0.55);
     interior = interior + (vec3<f32>(1.0, 0.62, 0.18) * fl * 2.2 + vec3<f32>(1.0, 0.95, 0.8) * core * 2.0) * min(F * 1.4, 1.0) * step(0.02, u.flameSize);
-    let rimCol = flesh * ambient * 1.3 + vec3<f32>(1.0, 0.7, 0.35) * F * 1.1;
+    // the inner wall seen through the hole: flesh in shadow, darker than the light behind it
+    let rimCol = vec3<f32>(0.62, 0.30, 0.09) * F * (0.55 + 0.6 * wallFall) + flesh * ambient * 0.35;
     let hole = mix(interior, rimCol, rim);
     col = mix(col, hole, cut);
+    // and a thin pale band where the knife cut the rind
+    let e = 2.4 * s / u.res;
+    let edgeN = max(max(textureSample(maskTex, samp, uv + vec2<f32>(e.x, 0.0)).r, textureSample(maskTex, samp, uv - vec2<f32>(e.x, 0.0)).r),
+                    max(textureSample(maskTex, samp, uv + vec2<f32>(0.0, e.y)).r, textureSample(maskTex, samp, uv - vec2<f32>(0.0, e.y)).r));
+    let band = clamp(edgeN - cut, 0.0, 1.0) * body;
+    let bandCol = flesh * (ambient * 0.9 + vec3<f32>(0.05)) + vec3<f32>(1.0, 0.72, 0.36) * F * 0.75;
+    col = mix(col, bandCol, band);
 
     // moonlight catches the pumpkin's edge that faces the window
     let toWindow = normalize(vec2<f32>(-1.0, -0.55));
@@ -198,7 +217,8 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     col = col + moonCol * edge * 0.3 * (1.0 - cut);
 
     // what shines on its own
-    col = col + em * (1.0 - body);
+    // what shines on its own: the window (never over the pumpkin) and the warm rim the candle puts on the stem
+    col = col + em * max(1.0 - body, smoothstep(0.0, 0.05, em.r - em.b));
 
     // rays: march from this pixel toward the flame, collecting the light that leaks
     let steps = 36;
@@ -222,29 +242,26 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     rays = rays * (1.0 - body) * hz * F * (1.0 - u.gust * 0.6);
     col = col + warm * rays * 3.6;
 
-    // the carving thrown large into the haze, as if on smoke
-    let projUv = (u.flamePos + fromFlame / 2.6) / u.res;
-    let projSharp = leak(textureSample(maskTex, samp, projUv));
-    let pr = 5.0 * s / u.res;
-    let projSoft = (leak(textureSample(maskLoTex, samp, projUv)) * 2.0
-        + leak(textureSample(maskLoTex, samp, projUv + vec2<f32>(cos(rot), sin(rot)) * pr))
-        + leak(textureSample(maskLoTex, samp, projUv - vec2<f32>(cos(rot), sin(rot)) * pr))
-        + leak(textureSample(maskLoTex, samp, projUv + vec2<f32>(-sin(rot), cos(rot)) * pr))
-        + leak(textureSample(maskLoTex, samp, projUv - vec2<f32>(-sin(rot), cos(rot)) * pr))) / 6.0;
-    let proj = mix(projSoft, projSharp, 0.6) * (1.0 - body) * (0.35 + 0.65 * hz) * F;
-    let dist = smoothstep(120.0, 380.0, dFlame) * (1.0 - smoothstep(700.0, 1100.0, dFlame));
+    // the wall above the pumpkin: your carving thrown up by the candle, hard
+    // edged with a small penumbra, and the face it becomes
     let glass = 1.0 - smoothstep(0.04, 0.12, dot(em, vec3<f32>(0.3, 0.5, 0.2)));
-    col = col + warm * proj * dist * 0.3 * glass;
-
-    // the ghost: shaped like the light, but nobody carved it
-    let wob = uv + vec2<f32>(sin(t * 1.3 + uv.y * 9.0), cos(t * 1.1 + uv.x * 7.0)) * 0.002;
-    var g = textureSample(ghostTex, samp, wob).r * 0.4;
-    for (var i = 0; i < 6; i = i + 1) {
-        let a = f32(i) * 1.047 + t * 0.5;
-        g = g + textureSample(ghostTex, samp, wob + vec2<f32>(cos(a), sin(a)) * 2.5 * s / u.res).r * 0.1;
-    }
-    let ghostCol = mix(vec3<f32>(1.0, 0.5, 0.16), vec3<f32>(0.75, 1.0, 0.82), 0.25 + 0.25 * sin(t * 0.7));
-    col = col + ghostCol * g * (1.0 - body) * u.phantom * (0.35 + 0.55 * smoke) * (0.55 + 0.45 * u.haze);
+    let pe = 1.6 * s / u.res;
+    var wt = textureSample(ghostTex, samp, uv) * 0.4;
+    wt = wt + textureSample(ghostTex, samp, uv + vec2<f32>(cos(rot), sin(rot)) * pe) * 0.15;
+    wt = wt + textureSample(ghostTex, samp, uv - vec2<f32>(cos(rot), sin(rot)) * pe) * 0.15;
+    wt = wt + textureSample(ghostTex, samp, uv + vec2<f32>(-sin(rot), cos(rot)) * pe) * 0.15;
+    wt = wt + textureSample(ghostTex, samp, uv - vec2<f32>(-sin(rot), cos(rot)) * pe) * 0.15;
+    let ph = u.phantom;
+    let Fw = min(F, 1.2);
+    let dark = 1.0 - clamp(wt.g, 0.0, 1.0) * min(1.0, ph * 1.6);
+    let litWall = Fw * (wt.r * (1.0 - ph * (1.0 - u.slide)) + wt.b * ph);
+    let selfWall = ph * wt.b * (1.0 - min(Fw, 1.0)) * 0.9;
+    let wallShape = clamp((litWall + selfWall) * dark, 0.0, 1.6);
+    let wallOn = (1.0 - body) * glass;
+    // the room around it goes darker while it watches, so it stands out
+    col = col * (1.0 - 0.28 * ph * wallOn);
+    let wallCol = mix(vec3<f32>(1.0, 0.62, 0.26), vec3<f32>(0.86, 0.95, 0.62), 0.35 * ph * (1.0 - min(Fw, 1.0)) + 0.12 * ph);
+    col = col + wallCol * wallShape * wallOn * (0.75 + 0.35 * u.haze);
 
     // haze in the air, lit by the moon and the candle
     let hazeLight = moonCol * 0.12 * (1.0 - L * 0.6) + warm * spillFall * F * 0.12;

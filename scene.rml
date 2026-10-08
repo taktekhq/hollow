@@ -10,23 +10,28 @@
                 <DataBindContext sourcePathIds="0:900-0:911" propertyKey="268"/>
             </TextValueRun>
         </Text>
+        <Node x="0" y="0" name="Title Group" id="0:2002">
+            <DataBindContext sourcePathIds="0:900-0:938" propertyKey="18"/>
         <Text x="52" y="18" sizingValue="autoWidth" name="Title" id="0:103">
-            <TextStylePaint fontSize="78" fontAssetId="0:31" familyName="Cormorant Garamond" styleName="SemiBold Italic" name="Title Style" id="0:2002">
+            <TextStylePaint fontSize="78" fontAssetId="0:31" familyName="Cormorant Garamond" styleName="SemiBold Italic" name="Title Style" id="0:2003">
                 <Fill name="Fill"><SolidColor colorValue="FFF2E6D0" name="C"/></Fill>
             </TextStylePaint>
-            <TextValueRun styleId="0:2002" text="Hollow" name="Run"/>
+            <TextValueRun styleId="0:2003" text="Hollow" name="Run"/>
         </Text>
         <Text x="58" y="112" sizingValue="autoWidth" name="Subtitle" id="0:104">
-            <TextStylePaint fontSize="11" fontAssetId="0:33" familyName="IBM Plex Mono" styleName="Medium" letterSpacing="2.4" name="Subtitle Style" id="0:2003">
+            <TextStylePaint fontSize="11" fontAssetId="0:33" familyName="IBM Plex Mono" styleName="Medium" letterSpacing="2.4" name="Subtitle Style" id="0:2004">
                 <Fill name="Fill"><SolidColor colorValue="FF9C9384" name="C"/></Fill>
             </TextStylePaint>
-            <TextValueRun styleId="0:2003" text="CARVE IT  ·  LIGHT IT  ·  DON'T TRUST WHAT IT CASTS" name="Run"/>
+            <TextValueRun styleId="0:2004" text="CARVE IT  ·  LIGHT IT  ·  DON'T TRUST WHAT IT CASTS" name="Run"/>
         </Text>
-        <Text x="1000" y="60" sizingValue="autoWidth" name="Label Tool" id="0:2005">
-            <TextStylePaint fontSize="11" fontAssetId="0:33" familyName="IBM Plex Mono" styleName="Medium" letterSpacing="2.2" name="Label Tool Style" id="0:2004">
+        </Node>
+        <Node x="0" y="0" name="Panel Group" id="0:2067">
+            <DataBindContext sourcePathIds="0:900-0:919" propertyKey="18"/>
+        <Text x="1000" y="60" sizingValue="autoWidth" name="Label Tool" id="0:2006">
+            <TextStylePaint fontSize="11" fontAssetId="0:33" familyName="IBM Plex Mono" styleName="Medium" letterSpacing="2.2" name="Label Tool Style" id="0:2005">
                 <Fill name="Fill"><SolidColor colorValue="FF9C9384" name="C"/></Fill>
             </TextStylePaint>
-            <TextValueRun styleId="0:2004" text="TOOL" name="Run"/>
+            <TextValueRun styleId="0:2005" text="TOOL" name="Run"/>
         </Text>
         <Shape x="1000" y="80" name="Hit Knife" id="0:110">
             <Rectangle width="108.0" height="44" originX="0" originY="0" name="Path"/>
@@ -36,52 +41,52 @@
             <Rectangle width="108.0" height="44" originX="0" originY="0" name="Path"/>
             <Fill name="Fill"><SolidColor colorValue="00000000" name="C"/></Fill>
         </Shape>
-        <Text x="1000" y="92" width="108.0" height="20" sizingValue="fixed" overflowValue="fitFontSize" alignValue="center" name="Knife Label" id="0:2007">
-            <TextStylePaint fontSize="13" fontAssetId="0:33" familyName="IBM Plex Mono" styleName="Medium" letterSpacing="2" name="Knife Label Style" id="0:2006">
+        <Text x="1000" y="92" width="108.0" height="20" sizingValue="fixed" overflowValue="fitFontSize" alignValue="center" name="Knife Label" id="0:2008">
+            <TextStylePaint fontSize="13" fontAssetId="0:33" familyName="IBM Plex Mono" styleName="Medium" letterSpacing="2" name="Knife Label Style" id="0:2007">
                 <Fill name="Fill"><SolidColor colorValue="FF17120E" name="C" id="0:101"/></Fill>
             </TextStylePaint>
-            <TextValueRun styleId="0:2006" text="KNIFE" name="Run"/>
+            <TextValueRun styleId="0:2007" text="KNIFE" name="Run"/>
         </Text>
-        <Text x="1108.0" y="92" width="108.0" height="20" sizingValue="fixed" overflowValue="fitFontSize" alignValue="center" name="Etch Label" id="0:2009">
-            <TextStylePaint fontSize="13" fontAssetId="0:33" familyName="IBM Plex Mono" styleName="Medium" letterSpacing="2" name="Etch Label Style" id="0:2008">
+        <Text x="1108.0" y="92" width="108.0" height="20" sizingValue="fixed" overflowValue="fitFontSize" alignValue="center" name="Etch Label" id="0:2010">
+            <TextStylePaint fontSize="13" fontAssetId="0:33" familyName="IBM Plex Mono" styleName="Medium" letterSpacing="2" name="Etch Label Style" id="0:2009">
                 <Fill name="Fill"><SolidColor colorValue="FFF2E6D0" name="C" id="0:102"/></Fill>
             </TextStylePaint>
-            <TextValueRun styleId="0:2008" text="ETCH" name="Run"/>
+            <TextValueRun styleId="0:2009" text="ETCH" name="Run"/>
         </Text>
         <Node x="1004" y="84" name="Tool Pill" id="0:100">
-            <Shape x="0" y="0" name="Pill" id="0:2010">
+            <Shape x="0" y="0" name="Pill" id="0:2011">
                 <Rectangle width="100.0" height="36" originX="0" originY="0" cornerRadiusTL="11" cornerRadiusTR="11" cornerRadiusBL="11" cornerRadiusBR="11" linkCornerRadius="false" name="Path"/>
                 <Fill name="Fill"><SolidColor colorValue="FFF2E6D0" name="C"/></Fill>
             </Shape>
         </Node>
-        <Shape x="1000" y="80" name="Tool Track" id="0:2011">
+        <Shape x="1000" y="80" name="Tool Track" id="0:2012">
             <Rectangle width="216" height="44" originX="0" originY="0" cornerRadiusTL="14" cornerRadiusTR="14" cornerRadiusBL="14" cornerRadiusBR="14" linkCornerRadius="false" name="Path"/>
             <Fill name="Fill"><SolidColor colorValue="14FFFFFF" name="C"/></Fill>
             <Stroke thickness="1" name="Stroke"><SolidColor colorValue="1FFFFFFF" name="C"/></Stroke>
         </Shape>
-        <Text x="1000" y="148" sizingValue="autoWidth" name="Label Stencils" id="0:2013">
-            <TextStylePaint fontSize="11" fontAssetId="0:33" familyName="IBM Plex Mono" styleName="Medium" letterSpacing="2.2" name="Label Stencils Style" id="0:2012">
+        <Text x="1000" y="148" sizingValue="autoWidth" name="Label Stencils" id="0:2014">
+            <TextStylePaint fontSize="11" fontAssetId="0:33" familyName="IBM Plex Mono" styleName="Medium" letterSpacing="2.2" name="Label Stencils Style" id="0:2013">
                 <Fill name="Fill"><SolidColor colorValue="FF9C9384" name="C"/></Fill>
             </TextStylePaint>
-            <TextValueRun styleId="0:2012" text="STENCILS  ·  AUTO-CARVE" name="Run"/>
+            <TextValueRun styleId="0:2013" text="STENCILS  ·  AUTO-CARVE" name="Run"/>
         </Text>
         <Shape x="1000" y="168" name="Hit Grin" id="0:112">
             <Rectangle width="216" height="42" originX="0" originY="0" name="Path"/>
             <Fill name="Fill"><SolidColor colorValue="00000000" name="C"/></Fill>
         </Shape>
-        <Text x="1016" y="172" sizingValue="autoWidth" name="Grin Label" id="0:2015">
-            <TextStylePaint fontSize="25" fontAssetId="0:31" familyName="Cormorant Garamond" styleName="SemiBold Italic" name="Grin Label Style" id="0:2014">
+        <Text x="1016" y="172" sizingValue="autoWidth" name="Grin Label" id="0:2016">
+            <TextStylePaint fontSize="25" fontAssetId="0:31" familyName="Cormorant Garamond" styleName="SemiBold Italic" name="Grin Label Style" id="0:2015">
                 <Fill name="Fill"><SolidColor colorValue="FFF2E6D0" name="C"/></Fill>
             </TextStylePaint>
-            <TextValueRun styleId="0:2014" text="Grin" name="Run"/>
+            <TextValueRun styleId="0:2015" text="Grin" name="Run"/>
         </Text>
-        <Text x="1000" y="182" width="200" height="16" sizingValue="fixed" overflowValue="fitFontSize" alignValue="right" name="Grin Hint" id="0:2017">
-            <TextStylePaint fontSize="10" fontAssetId="0:33" familyName="IBM Plex Mono" styleName="Medium" letterSpacing="1.6" name="Grin Hint Style" id="0:2016">
+        <Text x="1000" y="182" width="200" height="16" sizingValue="fixed" overflowValue="fitFontSize" alignValue="right" name="Grin Hint" id="0:2018">
+            <TextStylePaint fontSize="10" fontAssetId="0:33" familyName="IBM Plex Mono" styleName="Medium" letterSpacing="1.6" name="Grin Hint Style" id="0:2017">
                 <Fill name="Fill"><SolidColor colorValue="FF6E675C" name="C"/></Fill>
             </TextStylePaint>
-            <TextValueRun styleId="0:2016" text="CLASSIC" name="Run"/>
+            <TextValueRun styleId="0:2017" text="CLASSIC" name="Run"/>
         </Text>
-        <Shape x="1000" y="168" name="Grin Button" id="0:2018">
+        <Shape x="1000" y="168" name="Grin Button" id="0:2019">
             <Rectangle width="216" height="42" originX="0" originY="0" cornerRadiusTL="12" cornerRadiusTR="12" cornerRadiusBL="12" cornerRadiusBR="12" linkCornerRadius="false" name="Path"/>
             <Fill name="Fill"><SolidColor colorValue="0FFFFFFF" name="C"/></Fill>
             <Stroke thickness="1" name="Stroke"><SolidColor colorValue="1FFFFFFF" name="C"/></Stroke>
@@ -90,19 +95,19 @@
             <Rectangle width="216" height="42" originX="0" originY="0" name="Path"/>
             <Fill name="Fill"><SolidColor colorValue="00000000" name="C"/></Fill>
         </Shape>
-        <Text x="1016" y="222" sizingValue="autoWidth" name="Ghoul Label" id="0:2020">
-            <TextStylePaint fontSize="25" fontAssetId="0:31" familyName="Cormorant Garamond" styleName="SemiBold Italic" name="Ghoul Label Style" id="0:2019">
+        <Text x="1016" y="222" sizingValue="autoWidth" name="Ghoul Label" id="0:2021">
+            <TextStylePaint fontSize="25" fontAssetId="0:31" familyName="Cormorant Garamond" styleName="SemiBold Italic" name="Ghoul Label Style" id="0:2020">
                 <Fill name="Fill"><SolidColor colorValue="FFF2E6D0" name="C"/></Fill>
             </TextStylePaint>
-            <TextValueRun styleId="0:2019" text="Ghoul" name="Run"/>
+            <TextValueRun styleId="0:2020" text="Ghoul" name="Run"/>
         </Text>
-        <Text x="1000" y="232" width="200" height="16" sizingValue="fixed" overflowValue="fitFontSize" alignValue="right" name="Ghoul Hint" id="0:2022">
-            <TextStylePaint fontSize="10" fontAssetId="0:33" familyName="IBM Plex Mono" styleName="Medium" letterSpacing="1.6" name="Ghoul Hint Style" id="0:2021">
+        <Text x="1000" y="232" width="200" height="16" sizingValue="fixed" overflowValue="fitFontSize" alignValue="right" name="Ghoul Hint" id="0:2023">
+            <TextStylePaint fontSize="10" fontAssetId="0:33" familyName="IBM Plex Mono" styleName="Medium" letterSpacing="1.6" name="Ghoul Hint Style" id="0:2022">
                 <Fill name="Fill"><SolidColor colorValue="FF6E675C" name="C"/></Fill>
             </TextStylePaint>
-            <TextValueRun styleId="0:2021" text="CUT + ETCH" name="Run"/>
+            <TextValueRun styleId="0:2022" text="CUT + ETCH" name="Run"/>
         </Text>
-        <Shape x="1000" y="218" name="Ghoul Button" id="0:2023">
+        <Shape x="1000" y="218" name="Ghoul Button" id="0:2024">
             <Rectangle width="216" height="42" originX="0" originY="0" cornerRadiusTL="12" cornerRadiusTR="12" cornerRadiusBL="12" cornerRadiusBR="12" linkCornerRadius="false" name="Path"/>
             <Fill name="Fill"><SolidColor colorValue="0FFFFFFF" name="C"/></Fill>
             <Stroke thickness="1" name="Stroke"><SolidColor colorValue="1FFFFFFF" name="C"/></Stroke>
@@ -111,139 +116,139 @@
             <Rectangle width="216" height="42" originX="0" originY="0" name="Path"/>
             <Fill name="Fill"><SolidColor colorValue="00000000" name="C"/></Fill>
         </Shape>
-        <Text x="1016" y="272" sizingValue="autoWidth" name="Mashrabiya Label" id="0:2025">
-            <TextStylePaint fontSize="25" fontAssetId="0:31" familyName="Cormorant Garamond" styleName="SemiBold Italic" name="Mashrabiya Label Style" id="0:2024">
+        <Text x="1016" y="272" sizingValue="autoWidth" name="Mashrabiya Label" id="0:2026">
+            <TextStylePaint fontSize="25" fontAssetId="0:31" familyName="Cormorant Garamond" styleName="SemiBold Italic" name="Mashrabiya Label Style" id="0:2025">
                 <Fill name="Fill"><SolidColor colorValue="FFF2E6D0" name="C"/></Fill>
             </TextStylePaint>
-            <TextValueRun styleId="0:2024" text="Mashrabiya" name="Run"/>
+            <TextValueRun styleId="0:2025" text="Mashrabiya" name="Run"/>
         </Text>
-        <Text x="1000" y="276" width="200" height="24" sizingValue="fixed" overflowValue="fitFontSize" alignValue="right" name="Mashrabiya Hint" id="0:2027">
-            <TextStylePaint fontSize="15" fontAssetId="0:35" familyName="IBM Plex Sans Arabic" styleName="SemiBold" name="Mashrabiya Hint Style" id="0:2026">
+        <Text x="1000" y="276" width="200" height="24" sizingValue="fixed" overflowValue="fitFontSize" alignValue="right" name="Mashrabiya Hint" id="0:2028">
+            <TextStylePaint fontSize="15" fontAssetId="0:35" familyName="IBM Plex Sans Arabic" styleName="SemiBold" name="Mashrabiya Hint Style" id="0:2027">
                 <Fill name="Fill"><SolidColor colorValue="FFF0A040" name="C"/></Fill>
             </TextStylePaint>
-            <TextValueRun styleId="0:2026" text="مشربية" name="Run"/>
+            <TextValueRun styleId="0:2027" text="مشربية" name="Run"/>
         </Text>
-        <Shape x="1000" y="268" name="Mashrabiya Button" id="0:2028">
+        <Shape x="1000" y="268" name="Mashrabiya Button" id="0:2029">
             <Rectangle width="216" height="42" originX="0" originY="0" cornerRadiusTL="12" cornerRadiusTR="12" cornerRadiusBL="12" cornerRadiusBR="12" linkCornerRadius="false" name="Path"/>
             <Fill name="Fill"><SolidColor colorValue="0FFFFFFF" name="C"/></Fill>
             <Stroke thickness="1" name="Stroke"><SolidColor colorValue="1FFFFFFF" name="C"/></Stroke>
         </Shape>
-        <Text x="1000" y="330" sizingValue="autoWidth" name="Label Candle" id="0:2030">
-            <TextStylePaint fontSize="11" fontAssetId="0:33" familyName="IBM Plex Mono" styleName="Medium" letterSpacing="2.2" name="Label Candle Style" id="0:2029">
+        <Text x="1000" y="330" sizingValue="autoWidth" name="Label Candle" id="0:2031">
+            <TextStylePaint fontSize="11" fontAssetId="0:33" familyName="IBM Plex Mono" styleName="Medium" letterSpacing="2.2" name="Label Candle Style" id="0:2030">
                 <Fill name="Fill"><SolidColor colorValue="FF9C9384" name="C"/></Fill>
             </TextStylePaint>
-            <TextValueRun styleId="0:2029" text="CANDLE" name="Run"/>
+            <TextValueRun styleId="0:2030" text="CANDLE" name="Run"/>
         </Text>
         <Shape x="1000" y="350" name="Hit Candle" id="0:115">
             <Rectangle width="216" height="56" originX="0" originY="0" name="Path"/>
             <Fill name="Fill"><SolidColor colorValue="00000000" name="C"/></Fill>
         </Shape>
         <Text x="1000" y="362" width="216" height="44" sizingValue="fixed" overflowValue="fitFontSize" alignValue="center" name="Candle Light" id="0:122">
-            <TextStylePaint fontSize="28" fontAssetId="0:31" familyName="Cormorant Garamond" styleName="SemiBold Italic" name="Candle Light Style" id="0:2031">
+            <TextStylePaint fontSize="28" fontAssetId="0:31" familyName="Cormorant Garamond" styleName="SemiBold Italic" name="Candle Light Style" id="0:2032">
                 <Fill name="Fill"><SolidColor colorValue="FF17120E" name="C"/></Fill>
             </TextStylePaint>
-            <TextValueRun styleId="0:2031" text="Light the candle" name="Run"/>
+            <TextValueRun styleId="0:2032" text="Light the candle" name="Run"/>
         </Text>
         <Text x="1000" y="362" width="216" height="44" sizingValue="fixed" overflowValue="fitFontSize" alignValue="center" name="Candle Snuff" id="0:123">
-            <TextStylePaint fontSize="28" fontAssetId="0:31" familyName="Cormorant Garamond" styleName="SemiBold Italic" name="Candle Snuff Style" id="0:2032">
+            <TextStylePaint fontSize="28" fontAssetId="0:31" familyName="Cormorant Garamond" styleName="SemiBold Italic" name="Candle Snuff Style" id="0:2033">
                 <Fill name="Fill"><SolidColor colorValue="FFF0A040" name="C"/></Fill>
             </TextStylePaint>
-            <TextValueRun styleId="0:2032" text="Snuff it out" name="Run"/>
+            <TextValueRun styleId="0:2033" text="Snuff it out" name="Run"/>
         </Text>
         <Shape x="1024" y="378" name="Candle Dot" id="0:124">
             <Ellipse width="8" height="8" name="Path"/>
             <Fill name="Fill"><SolidColor colorValue="FFFFD27A" name="C"/></Fill>
         </Shape>
-        <Shape x="1000" y="350" name="Candle Button" id="0:2033">
+        <Shape x="1000" y="350" name="Candle Button" id="0:2034">
             <Rectangle width="216" height="56" originX="0" originY="0" cornerRadiusTL="16" cornerRadiusTR="16" cornerRadiusBL="16" cornerRadiusBR="16" linkCornerRadius="false" name="Path"/>
             <Fill name="Fill"><SolidColor colorValue="FFF0A040" name="C" id="0:120"/></Fill>
             <Stroke thickness="1.5" name="Stroke"><SolidColor colorValue="00F0A040" name="C" id="0:121"/></Stroke>
         </Shape>
-        <Text x="1000" y="462" sizingValue="autoWidth" name="Label Flame" id="0:2035">
-            <TextStylePaint fontSize="11" fontAssetId="0:33" familyName="IBM Plex Mono" styleName="Medium" letterSpacing="2.2" name="Label Flame Style" id="0:2034">
+        <Text x="1000" y="462" sizingValue="autoWidth" name="Label Flame" id="0:2036">
+            <TextStylePaint fontSize="11" fontAssetId="0:33" familyName="IBM Plex Mono" styleName="Medium" letterSpacing="2.2" name="Label Flame Style" id="0:2035">
                 <Fill name="Fill"><SolidColor colorValue="FF9C9384" name="C"/></Fill>
             </TextStylePaint>
-            <TextValueRun styleId="0:2034" text="FLAME" name="Run"/>
+            <TextValueRun styleId="0:2035" text="FLAME" name="Run"/>
         </Text>
-        <Text x="1000" y="460" width="216" height="19" sizingValue="fixed" overflowValue="fitFontSize" alignValue="right" name="Label Flame Value" id="0:2037">
-            <TextStylePaint fontSize="12" fontAssetId="0:33" familyName="IBM Plex Mono" styleName="Medium" name="Label Flame Value Style" id="0:2036">
+        <Text x="1000" y="460" width="216" height="19" sizingValue="fixed" overflowValue="fitFontSize" alignValue="right" name="Label Flame Value" id="0:2038">
+            <TextStylePaint fontSize="12" fontAssetId="0:33" familyName="IBM Plex Mono" styleName="Medium" name="Label Flame Value Style" id="0:2037">
                 <Fill name="Fill"><SolidColor colorValue="FFF2E6D0" name="C"/></Fill>
             </TextStylePaint>
-            <TextValueRun styleId="0:2036" text="0" name="Run">
+            <TextValueRun styleId="0:2037" text="0" name="Run">
                 <DataBindContext sourcePathIds="0:900-0:909" propertyKey="268"/>
             </TextValueRun>
         </Text>
-        <Node x="1000" y="492" name="Flame Knob" id="0:2038">
+        <Node x="1000" y="492" name="Flame Knob" id="0:2039">
             <DataBindContext sourcePathIds="0:900-0:905" propertyKey="13" converterId="0:961"/>
-            <Shape x="0" y="0" name="Knob" id="0:2039">
+            <Shape x="0" y="0" name="Knob" id="0:2040">
                 <Ellipse width="18" height="18" name="Path"/>
                 <Fill name="Fill"><SolidColor colorValue="FFF2E6D0" name="C"/></Fill>
             </Shape>
-            <Shape x="0" y="0" name="Knob Halo" id="0:2040">
+            <Shape x="0" y="0" name="Knob Halo" id="0:2041">
                 <Ellipse width="30" height="30" name="Path"/>
                 <Fill name="Fill"><SolidColor colorValue="33F0A040" name="C"/></Fill>
             </Shape>
         </Node>
-        <Shape x="1000" y="490" name="Flame Fill" id="0:2041">
+        <Shape x="1000" y="490" name="Flame Fill" id="0:2042">
             <Rectangle width="172.8" height="4" originX="0" originY="0" cornerRadiusTL="2" cornerRadiusTR="2" cornerRadiusBL="2" cornerRadiusBR="2" linkCornerRadius="false" name="Path"><DataBindContext sourcePathIds="0:900-0:905" propertyKey="20" converterId="0:960"/></Rectangle>
             <Fill name="Fill"><SolidColor colorValue="FFF0A040" name="C"/></Fill>
         </Shape>
-        <Shape x="1000" y="490" name="Flame Track" id="0:2042">
+        <Shape x="1000" y="490" name="Flame Track" id="0:2043">
             <Rectangle width="216" height="4" originX="0" originY="0" cornerRadiusTL="2" cornerRadiusTR="2" cornerRadiusBL="2" cornerRadiusBR="2" linkCornerRadius="false" name="Path"/>
             <Fill name="Fill"><SolidColor colorValue="26FFFFFF" name="C"/></Fill>
         </Shape>
-        <Text x="1000" y="530" sizingValue="autoWidth" name="Label Haze" id="0:2044">
-            <TextStylePaint fontSize="11" fontAssetId="0:33" familyName="IBM Plex Mono" styleName="Medium" letterSpacing="2.2" name="Label Haze Style" id="0:2043">
+        <Text x="1000" y="530" sizingValue="autoWidth" name="Label Haze" id="0:2045">
+            <TextStylePaint fontSize="11" fontAssetId="0:33" familyName="IBM Plex Mono" styleName="Medium" letterSpacing="2.2" name="Label Haze Style" id="0:2044">
                 <Fill name="Fill"><SolidColor colorValue="FF9C9384" name="C"/></Fill>
             </TextStylePaint>
-            <TextValueRun styleId="0:2043" text="HAZE" name="Run"/>
+            <TextValueRun styleId="0:2044" text="HAZE" name="Run"/>
         </Text>
-        <Text x="1000" y="528" width="216" height="19" sizingValue="fixed" overflowValue="fitFontSize" alignValue="right" name="Label Haze Value" id="0:2046">
-            <TextStylePaint fontSize="12" fontAssetId="0:33" familyName="IBM Plex Mono" styleName="Medium" name="Label Haze Value Style" id="0:2045">
+        <Text x="1000" y="528" width="216" height="19" sizingValue="fixed" overflowValue="fitFontSize" alignValue="right" name="Label Haze Value" id="0:2047">
+            <TextStylePaint fontSize="12" fontAssetId="0:33" familyName="IBM Plex Mono" styleName="Medium" name="Label Haze Value Style" id="0:2046">
                 <Fill name="Fill"><SolidColor colorValue="FFF2E6D0" name="C"/></Fill>
             </TextStylePaint>
-            <TextValueRun styleId="0:2045" text="0" name="Run">
+            <TextValueRun styleId="0:2046" text="0" name="Run">
                 <DataBindContext sourcePathIds="0:900-0:910" propertyKey="268"/>
             </TextValueRun>
         </Text>
-        <Node x="1000" y="560" name="Haze Knob" id="0:2047">
+        <Node x="1000" y="560" name="Haze Knob" id="0:2048">
             <DataBindContext sourcePathIds="0:900-0:906" propertyKey="13" converterId="0:961"/>
-            <Shape x="0" y="0" name="Knob" id="0:2048">
+            <Shape x="0" y="0" name="Knob" id="0:2049">
                 <Ellipse width="18" height="18" name="Path"/>
                 <Fill name="Fill"><SolidColor colorValue="FFF2E6D0" name="C"/></Fill>
             </Shape>
-            <Shape x="0" y="0" name="Knob Halo" id="0:2049">
+            <Shape x="0" y="0" name="Knob Halo" id="0:2050">
                 <Ellipse width="30" height="30" name="Path"/>
                 <Fill name="Fill"><SolidColor colorValue="33F0A040" name="C"/></Fill>
             </Shape>
         </Node>
-        <Shape x="1000" y="558" name="Haze Fill" id="0:2050">
+        <Shape x="1000" y="558" name="Haze Fill" id="0:2051">
             <Rectangle width="172.8" height="4" originX="0" originY="0" cornerRadiusTL="2" cornerRadiusTR="2" cornerRadiusBL="2" cornerRadiusBR="2" linkCornerRadius="false" name="Path"><DataBindContext sourcePathIds="0:900-0:906" propertyKey="20" converterId="0:960"/></Rectangle>
             <Fill name="Fill"><SolidColor colorValue="FFF0A040" name="C"/></Fill>
         </Shape>
-        <Shape x="1000" y="558" name="Haze Track" id="0:2051">
+        <Shape x="1000" y="558" name="Haze Track" id="0:2052">
             <Rectangle width="216" height="4" originX="0" originY="0" cornerRadiusTL="2" cornerRadiusTR="2" cornerRadiusBL="2" cornerRadiusBR="2" linkCornerRadius="false" name="Path"/>
             <Fill name="Fill"><SolidColor colorValue="26FFFFFF" name="C"/></Fill>
         </Shape>
-        <Text x="1000" y="604" sizingValue="autoWidth" name="Label Escape" id="0:2053">
-            <TextStylePaint fontSize="11" fontAssetId="0:33" familyName="IBM Plex Mono" styleName="Medium" letterSpacing="2.2" name="Label Escape Style" id="0:2052">
+        <Text x="1000" y="604" sizingValue="autoWidth" name="Label Escape" id="0:2054">
+            <TextStylePaint fontSize="11" fontAssetId="0:33" familyName="IBM Plex Mono" styleName="Medium" letterSpacing="2.2" name="Label Escape Style" id="0:2053">
                 <Fill name="Fill"><SolidColor colorValue="FF9C9384" name="C"/></Fill>
             </TextStylePaint>
-            <TextValueRun styleId="0:2052" text="LIGHT ESCAPING" name="Run"/>
+            <TextValueRun styleId="0:2053" text="LIGHT ESCAPING" name="Run"/>
         </Text>
-        <Text x="1000" y="602" width="216" height="19" sizingValue="fixed" overflowValue="fitFontSize" alignValue="right" name="Label Escape Value" id="0:2055">
-            <TextStylePaint fontSize="12" fontAssetId="0:33" familyName="IBM Plex Mono" styleName="Medium" name="Label Escape Value Style" id="0:2054">
+        <Text x="1000" y="602" width="216" height="19" sizingValue="fixed" overflowValue="fitFontSize" alignValue="right" name="Label Escape Value" id="0:2056">
+            <TextStylePaint fontSize="12" fontAssetId="0:33" familyName="IBM Plex Mono" styleName="Medium" name="Label Escape Value Style" id="0:2055">
                 <Fill name="Fill"><SolidColor colorValue="FFF2E6D0" name="C"/></Fill>
             </TextStylePaint>
-            <TextValueRun styleId="0:2054" text="0" name="Run">
+            <TextValueRun styleId="0:2055" text="0" name="Run">
                 <DataBindContext sourcePathIds="0:900-0:908" propertyKey="268"/>
             </TextValueRun>
         </Text>
-        <Shape x="1000" y="630" name="Escape Fill" id="0:2056">
+        <Shape x="1000" y="630" name="Escape Fill" id="0:2057">
             <Rectangle width="0" height="6" originX="0" originY="0" cornerRadiusTL="3" cornerRadiusTR="3" cornerRadiusBL="3" cornerRadiusBR="3" linkCornerRadius="false" name="Path"><DataBindContext sourcePathIds="0:900-0:907" propertyKey="20" converterId="0:960"/></Rectangle>
             <Fill name="Fill"><SolidColor colorValue="FFE07A2A" name="C"/></Fill>
         </Shape>
-        <Shape x="1000" y="630" name="Escape Track" id="0:2057">
+        <Shape x="1000" y="630" name="Escape Track" id="0:2058">
             <Rectangle width="216" height="6" originX="0" originY="0" cornerRadiusTL="3" cornerRadiusTR="3" cornerRadiusBL="3" cornerRadiusBR="3" linkCornerRadius="false" name="Path"/>
             <Fill name="Fill"><SolidColor colorValue="1AFFFFFF" name="C"/></Fill>
         </Shape>
@@ -251,28 +256,28 @@
             <Rectangle width="216" height="46" originX="0" originY="0" name="Path"/>
             <Fill name="Fill"><SolidColor colorValue="00000000" name="C"/></Fill>
         </Shape>
-        <Text x="1000" y="697" width="216" height="19" sizingValue="fixed" overflowValue="fitFontSize" alignValue="center" name="New Label" id="0:2059">
-            <TextStylePaint fontSize="12" fontAssetId="0:33" familyName="IBM Plex Mono" styleName="Medium" letterSpacing="2.4" name="New Label Style" id="0:2058">
+        <Text x="1000" y="697" width="216" height="19" sizingValue="fixed" overflowValue="fitFontSize" alignValue="center" name="New Label" id="0:2060">
+            <TextStylePaint fontSize="12" fontAssetId="0:33" familyName="IBM Plex Mono" styleName="Medium" letterSpacing="2.4" name="New Label Style" id="0:2059">
                 <Fill name="Fill"><SolidColor colorValue="FFF2E6D0" name="C"/></Fill>
             </TextStylePaint>
-            <TextValueRun styleId="0:2058" text="NEW PUMPKIN" name="Run"/>
+            <TextValueRun styleId="0:2059" text="NEW PUMPKIN" name="Run"/>
         </Text>
-        <Shape x="1000" y="684" name="New Button" id="0:2060">
+        <Shape x="1000" y="684" name="New Button" id="0:2061">
             <Rectangle width="216" height="46" originX="0" originY="0" cornerRadiusTL="14" cornerRadiusTR="14" cornerRadiusBL="14" cornerRadiusBR="14" linkCornerRadius="false" name="Path"/>
             <Stroke thickness="1" name="Stroke"><SolidColor colorValue="40F2E6D0" name="C"/></Stroke>
         </Shape>
-        <Shape x="1000" y="664" name="Panel Rule" id="0:2061">
+        <Shape x="1000" y="664" name="Panel Rule" id="0:2062">
             <Rectangle width="216" height="1" originX="0" originY="0" name="Path"/>
             <Fill name="Fill"><SolidColor colorValue="1AFFFFFF" name="C"/></Fill>
         </Shape>
-        <Node x="1108" y="189" name="Hover Halo" id="0:2062">
+        <Node x="1108" y="189" name="Hover Halo" id="0:2063">
             <DataBindContext sourcePathIds="0:900-0:913" propertyKey="13"/>
             <DataBindContext sourcePathIds="0:900-0:914" propertyKey="14"/>
             <DataBindContext sourcePathIds="0:900-0:917" propertyKey="18"/>
             <DataBindContext sourcePathIds="0:900-0:918" propertyKey="16" converterId="0:963"/>
             <DataBindContext sourcePathIds="0:900-0:918" propertyKey="17" converterId="0:963"/>
-            <Shape x="0" y="0" name="Halo" id="0:2063">
-                <Rectangle width="216" height="42" originX="0.5" originY="0.5" cornerRadiusTL="13" cornerRadiusTR="13" cornerRadiusBL="13" cornerRadiusBR="13" linkCornerRadius="false" name="Path" id="0:2064">
+            <Shape x="0" y="0" name="Halo" id="0:2064">
+                <Rectangle width="216" height="42" originX="0.5" originY="0.5" cornerRadiusTL="13" cornerRadiusTR="13" cornerRadiusBL="13" cornerRadiusBR="13" linkCornerRadius="false" name="Path" id="0:2065">
                     <DataBindContext sourcePathIds="0:900-0:915" propertyKey="20"/>
                     <DataBindContext sourcePathIds="0:900-0:916" propertyKey="21"/>
                 </Rectangle>
@@ -280,11 +285,12 @@
                 <Stroke thickness="1.5" name="Stroke"><SolidColor colorValue="B3F0A040" name="C"/></Stroke>
             </Shape>
         </Node>
-        <Shape x="976" y="36" name="Panel" id="0:2065">
+        <Shape x="976" y="36" name="Panel" id="0:2066">
             <Rectangle width="272" height="728" originX="0" originY="0" cornerRadiusTL="24" cornerRadiusTR="24" cornerRadiusBL="24" cornerRadiusBR="24" linkCornerRadius="false" name="Path"/>
             <Fill name="Fill"><SolidColor colorValue="D90C0A0E" name="C"/></Fill>
             <Stroke thickness="1" name="Stroke"><SolidColor colorValue="1AFFFFFF" name="C"/></Stroke>
         </Shape>
+        </Node>
         <LayoutComponent width="1280" height="800" styleId="0:11" name="Stage" id="0:10">
             <LayoutComponentStyle layoutWidthScaleType="1" layoutHeightScaleType="1" widthUnitsValue="3" heightUnitsValue="3" name="Stage Style" id="0:11"/>
             <ScriptedLayout scriptAssetId="0:80" name="Room" id="0:12"/>
@@ -358,52 +364,52 @@
                 <EntryState><StateTransition stateToId="0:531"/></EntryState>
                 <AnimationState x="160" y="140" animationId="0:605" id="0:531"/>
             </StateMachineLayer>
-        <StateMachineListenerSingle targetId="0:110" listenerTypeValue="click" name="Pick Knife" id="0:2067">
+        <StateMachineListenerSingle targetId="0:110" listenerTypeValue="click" name="Pick Knife" id="0:2069">
             <ListenerViewModelChange>
                 <BindablePropertyNumber propertyValue="0">
                     <DataBindContext sourcePathIds="0:900-0:901" propertyKey="636" direction="true"/>
                 </BindablePropertyNumber>
             </ListenerViewModelChange>
         </StateMachineListenerSingle>
-        <StateMachineListenerSingle targetId="0:111" listenerTypeValue="click" name="Pick Etch" id="0:2068">
+        <StateMachineListenerSingle targetId="0:111" listenerTypeValue="click" name="Pick Etch" id="0:2070">
             <ListenerViewModelChange>
                 <BindablePropertyNumber propertyValue="1">
                     <DataBindContext sourcePathIds="0:900-0:901" propertyKey="636" direction="true"/>
                 </BindablePropertyNumber>
             </ListenerViewModelChange>
         </StateMachineListenerSingle>
-        <StateMachineListenerSingle targetId="0:112" listenerTypeValue="click" name="Stencil Grin" id="0:2069">
+        <StateMachineListenerSingle targetId="0:112" listenerTypeValue="click" name="Stencil Grin" id="0:2071">
             <ListenerViewModelChange>
                 <BindablePropertyNumber propertyValue="1">
                     <DataBindContext sourcePathIds="0:900-0:903" propertyKey="636" direction="true"/>
                 </BindablePropertyNumber>
             </ListenerViewModelChange>
         </StateMachineListenerSingle>
-        <StateMachineListenerSingle targetId="0:113" listenerTypeValue="click" name="Stencil Ghoul" id="0:2070">
+        <StateMachineListenerSingle targetId="0:113" listenerTypeValue="click" name="Stencil Ghoul" id="0:2072">
             <ListenerViewModelChange>
                 <BindablePropertyNumber propertyValue="2">
                     <DataBindContext sourcePathIds="0:900-0:903" propertyKey="636" direction="true"/>
                 </BindablePropertyNumber>
             </ListenerViewModelChange>
         </StateMachineListenerSingle>
-        <StateMachineListenerSingle targetId="0:114" listenerTypeValue="click" name="Stencil Mashrabiya" id="0:2071">
+        <StateMachineListenerSingle targetId="0:114" listenerTypeValue="click" name="Stencil Mashrabiya" id="0:2073">
             <ListenerViewModelChange>
                 <BindablePropertyNumber propertyValue="3">
                     <DataBindContext sourcePathIds="0:900-0:903" propertyKey="636" direction="true"/>
                 </BindablePropertyNumber>
             </ListenerViewModelChange>
         </StateMachineListenerSingle>
-        <StateMachineListenerSingle targetId="0:116" listenerTypeValue="click" name="New Pumpkin" id="0:2072">
+        <StateMachineListenerSingle targetId="0:116" listenerTypeValue="click" name="New Pumpkin" id="0:2074">
             <ListenerViewModelChange>
                 <BindablePropertyNumber propertyValue="1">
                     <DataBindContext sourcePathIds="0:900-0:904" propertyKey="636" direction="true"/>
                 </BindablePropertyNumber>
             </ListenerViewModelChange>
         </StateMachineListenerSingle>
-        <StateMachineListenerSingle targetId="0:115" listenerTypeValue="click" name="Toggle Candle" id="0:2073">
-            <ListenerViewModelChange fromViewModelProperty="true" fromDataBindId="0:2066">
+        <StateMachineListenerSingle targetId="0:115" listenerTypeValue="click" name="Toggle Candle" id="0:2075">
+            <ListenerViewModelChange fromViewModelProperty="true" fromDataBindId="0:2068">
                 <BindablePropertyBoolean>
-                    <DataBindContext sourcePathIds="0:900-0:902" propertyKey="634" id="0:2066" converterId="0:962"/>
+                    <DataBindContext sourcePathIds="0:900-0:902" propertyKey="634" id="0:2068" converterId="0:962"/>
                     <DataBindContext sourcePathIds="0:900-0:902" propertyKey="634" direction="true"/>
                 </BindablePropertyBoolean>
             </ListenerViewModelChange>
@@ -463,6 +469,16 @@
         <ViewModelPropertyNumber name="haloH" id="0:916"/>
         <ViewModelPropertyNumber name="haloOn" id="0:917"/>
         <ViewModelPropertyNumber name="haloPress" id="0:918"/>
+        <ViewModelPropertyNumber name="chrome" id="0:919"/>
+        <ViewModelPropertyNumber name="titleOn" id="0:938"/>
+        <ViewModelPropertyNumber name="ghostState" id="0:930"/>
+        <ViewModelPropertyNumber name="phantom" id="0:931"/>
+        <ViewModelPropertyNumber name="lookX" id="0:932"/>
+        <ViewModelPropertyNumber name="lookY" id="0:933"/>
+        <ViewModelPropertyNumber name="eyeLX" id="0:934"/>
+        <ViewModelPropertyNumber name="eyeLY" id="0:935"/>
+        <ViewModelPropertyNumber name="eyeRX" id="0:936"/>
+        <ViewModelPropertyNumber name="eyeRY" id="0:937"/>
         <ViewModelInstance exports="true" name="Default" id="0:920">
             <ViewModelInstanceNumber propertyValue="0" viewModelPropertyId="0:901"/>
             <ViewModelInstanceBoolean propertyValue="false" viewModelPropertyId="0:902"/>
@@ -482,6 +498,16 @@
             <ViewModelInstanceNumber propertyValue="42" viewModelPropertyId="0:916"/>
             <ViewModelInstanceNumber propertyValue="0" viewModelPropertyId="0:917"/>
             <ViewModelInstanceNumber propertyValue="0" viewModelPropertyId="0:918"/>
+            <ViewModelInstanceNumber propertyValue="1" viewModelPropertyId="0:919"/>
+            <ViewModelInstanceNumber propertyValue="1" viewModelPropertyId="0:938"/>
+            <ViewModelInstanceNumber propertyValue="0" viewModelPropertyId="0:930"/>
+            <ViewModelInstanceNumber propertyValue="0" viewModelPropertyId="0:931"/>
+            <ViewModelInstanceNumber propertyValue="0" viewModelPropertyId="0:932"/>
+            <ViewModelInstanceNumber propertyValue="0" viewModelPropertyId="0:933"/>
+            <ViewModelInstanceNumber propertyValue="0" viewModelPropertyId="0:934"/>
+            <ViewModelInstanceNumber propertyValue="0" viewModelPropertyId="0:935"/>
+            <ViewModelInstanceNumber propertyValue="0" viewModelPropertyId="0:936"/>
+            <ViewModelInstanceNumber propertyValue="0" viewModelPropertyId="0:937"/>
         </ViewModelInstance>
     </ViewModel>
     <FontAsset file="fonts/CormorantGaramond-SemiBoldItalic.ttf" name="Cormorant Garamond SemiBold Italic" id="0:31"/>

@@ -17,7 +17,7 @@ import sys
 from concurrent.futures import ThreadPoolExecutor
 
 sys.path.insert(0, os.path.dirname(__file__))
-from timeline import TAKES  # noqa: E402
+from timeline import TAKES, cut_frames  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RIVE = os.path.expanduser('~/.rive/bin/rive')
@@ -78,6 +78,7 @@ def main():
     ap.add_argument('--viewport', default='')
     ap.add_argument('--only', default='', help='comma list of frame indices')
     ap.add_argument('--data', action='append', default=[])
+    ap.add_argument('--cut', action='store_true', help='only the frames the cut in timeline.py uses')
     a = ap.parse_args()
 
     take = TAKES[a.take]()
@@ -93,6 +94,8 @@ def main():
     tag = f'{a.take}_{os.getpid()}'
     dirs = [worker_dir(i, tag) for i in range(a.jobs)]
     todo = [k for k in range(0, n, a.every) if not os.path.exists(os.path.join(a.out, f'{k:05d}.png'))]
+    if a.cut:
+        todo = [k for k in cut_frames(a.take) if k < n and not os.path.exists(os.path.join(a.out, f'{k:05d}.png'))]
     if a.only:
         todo = [int(v) for v in a.only.split(',')]
     meta = open(os.path.join(a.out, 'pointer.tsv'), 'w')
