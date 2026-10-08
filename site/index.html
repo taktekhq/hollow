@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hollow: carve it, light it, don't trust what it casts</title>
+<meta name="description" content="An interactive jack-o'-lantern made with the Rive CLI, Luau scripting and a WGSL GPU Canvas shader, for the Rive Halloween Challenge.">
+<meta property="og:title" content="Hollow: an interactive jack-o'-lantern in Rive">
+<meta property="og:description" content="Carve a pumpkin with your pointer, light it, and watch a WGSL shader throw your carving across the room. Something on the wall looks back.">
+<meta property="og:image" content="https://taktekhq.github.io/hollow/media/hollow-hero.png">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+@font-face { font-family: "Cormorant"; src: url("fonts/CormorantGaramond-SemiBoldItalic.ttf"); font-style: italic; font-weight: 600; font-display: swap; }
+@font-face { font-family: "Cormorant"; src: url("fonts/CormorantGaramond-Medium.ttf"); font-style: normal; font-weight: 500; font-display: swap; }
+@font-face { font-family: "Plex Mono"; src: url("fonts/IBMPlexMono-Medium.ttf"); font-weight: 500; font-display: swap; }
+:root {
+  --night: #0c0a0e;
+  --panel: #151217;
+  --line: rgba(255,255,255,.09);
+  --cream: #f2e6d0;
+  --muted: #9c9384;
+  --amber: #f0a040;
+  --ember: #e07a2a;
+  --space: clamp(20px, 4vw, 48px);
+  --serif: "Cormorant", Georgia, serif;
+  --mono: "Plex Mono", ui-monospace, Menlo, monospace;
+}
+* { box-sizing: border-box; }
+html { background: var(--night); color: var(--cream); }
+body { margin: 0; font: 500 21px/1.5 var(--serif); -webkit-font-smoothing: antialiased; }
+a { color: var(--amber); text-underline-offset: 3px; }
+a:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; border-radius: 4px; }
+.wrap { max-width: 1160px; margin: 0 auto; padding: 0 var(--space); }
+.label { font: 500 12px/1.4 var(--mono); letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
+header { padding: clamp(40px, 8vw, 96px) 0 32px; background: radial-gradient(60% 80% at 30% 0%, rgba(224,122,42,.16), transparent 70%); }
+h1 { font: italic 600 clamp(72px, 13vw, 156px)/.9 var(--serif); margin: 0 0 14px; letter-spacing: -.01em; }
+.lede { font-size: clamp(22px, 2.4vw, 28px); max-width: 34em; margin: 22px 0 28px; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.btn { display: inline-flex; align-items: center; gap: 10px; padding: 12px 20px; border-radius: 14px; font: 500 13px var(--mono); letter-spacing: .12em; text-transform: uppercase; text-decoration: none; }
+.btn.primary { background: var(--amber); color: #17120e; }
+.btn.ghost { border: 1px solid rgba(242,230,208,.25); color: var(--cream); }
+.note { font: 500 12px/1.5 var(--mono); color: var(--muted); max-width: 36em; }
+.film { margin: 24px 0 0; border-radius: 18px; overflow: hidden; border: 1px solid var(--line); background: #000; aspect-ratio: 16/10; }
+.film video { width: 100%; height: 100%; display: block; }
+section { padding: clamp(48px, 7vw, 88px) 0 0; }
+h2 { font: italic 600 clamp(36px, 4.6vw, 54px)/1.05 var(--serif); margin: 8px 0 22px; }
+.how { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
+.how div { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 22px 22px 18px; }
+.how b { display: block; font: 500 12px var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--amber); margin-bottom: 8px; }
+.how p { margin: 0; font-size: 20px; }
+.stills { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+.stills figure { margin: 0; }
+.stills img { width: 100%; display: block; border-radius: 14px; border: 1px solid var(--line); }
+.stills figcaption { font: 500 12px/1.5 var(--mono); color: var(--muted); margin-top: 8px; letter-spacing: .04em; }
+.files { width: 100%; border-collapse: collapse; font-size: 19px; }
+.files td { padding: 14px 12px 14px 0; border-top: 1px solid var(--line); vertical-align: top; }
+.files td:first-child { font: 500 14px var(--mono); color: var(--amber); white-space: nowrap; padding-right: 28px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 22px 0 0; padding: 0; list-style: none; }
+.chips li { font: 500 12px var(--mono); letter-spacing: .1em; text-transform: uppercase; padding: 8px 12px; border-radius: 999px; border: 1px solid rgba(240,160,64,.4); color: var(--cream); }
+footer { padding: 72px 0 56px; color: var(--muted); font-size: 18px; }
+footer p { margin: 6px 0; }
+@media (max-width: 640px) { .stills { grid-template-columns: 1fr; } .files td:first-child { white-space: normal; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <p class="label">Rive Halloween Challenge · October 2026</p>
+    <h1>Hollow</h1>
+    <p class="label">Carve it · Light it · Don't trust what it casts</p>
+    <p class="lede">Carve a pumpkin with your pointer, then light the candle. A WGSL shader lights the room through whatever you cut, and throws your carving across the wall. Leave it lit long enough and the light shows a face you didn't carve.</p>
+    <div class="actions">
+      <a class="btn primary" href="#film">Watch the video</a>
+      <a class="btn ghost" href="https://github.com/taktekhq/hollow">Source on GitHub</a>
+    </div>
+    <div class="film" id="film">
+      <video controls playsinline preload="metadata" poster="media/hollow-hero.png">
+        <source src="media/hollow.mp4" type="video/mp4">
+      </video>
+    </div>
+    <p class="note" style="margin-top:14px">A playable Rive link will be added here once the file is published with <code>rive --publish=web</code>. Scripted Rive files have to be signed by a logged-in account before a web runtime will run them.</p>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <p class="label">What you can do</p>
+    <h2>A knife, a candle, and something on the wall</h2>
+    <div class="how">
+      <div><b>Knife</b><p>Drag to cut. Close the shape and the piece pops out and tumbles onto the table. Leave it open for a slit of light.</p></div>
+      <div><b>Etch</b><p>Shave the skin instead of cutting through. Once the candle is lit, the thin flesh glows amber.</p></div>
+      <div><b>Stencils</b><p>Grin, Ghoul, and Mashrabiya (مشربية), after the carved wooden screens of old Beirut houses. The script carves each one star by star.</p></div>
+      <div><b>Candle</b><p>It catches like a struck match. Sweep past it fast and the flame gutters. Snuff it and the eyes on the wall stay a moment longer.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="label">Stills, rendered with the Rive CLI</p>
+    <h2>Moonlight, then candlelight</h2>
+    <div class="stills">
+      <figure><img src="media/hollow-carving.png" alt="An uncarved pumpkin in moonlight with two triangle eyes cut and a knife mid-stroke" loading="lazy"><figcaption>Carving by moonlight. Closed cuts fall onto the table.</figcaption></figure>
+      <figure><img src="media/hollow-mashrabiya.png" alt="A pumpkin carved with an eight-point star lattice, lit, throwing stars across the room" loading="lazy"><figcaption>The mashrabiya stencil, lit. Thirty stars thrown into the haze.</figcaption></figure>
+      <figure><img src="media/hollow-snuffed.png" alt="The candle snuffed, the room blue again, two glowing eyes still on the wall" loading="lazy"><figcaption>Snuffed. Smoke from the lid, and it is still looking at you.</figcaption></figure>
+      <figure><img src="media/hollow-ghoul.png" alt="A ghoul face with etched brows and cheeks glowing amber and a jagged mouth" loading="lazy"><figcaption>The ghoul stencil. Cut eyes and mouth, etched brows and cheeks.</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="label">How it's built</p>
+    <h2>Three text files and the Rive CLI</h2>
+    <table class="files">
+      <tr><td>scene.rml</td><td>The artboard markup: the words, the control panel, a view model and two state-machine layers (the tool pill slides with a hand-tuned overshoot, and the candle button crossfades). Click listeners write the view model.</td></tr>
+      <tr><td>main.luau</td><td>A scripted layout that owns the room. It handles pointer carving, stencil jobs, falling pieces, the candle, the gust and the ghost. Every frame it draws five offscreen canvases and hands them to the shader.</td></tr>
+      <tr><td>light.wgsl</td><td>One GPU Canvas pass: moonlight, glow through the cuts, warmth in the rind, the flame seen through the holes, a ray march toward the flame, your carving projected into the haze, and the thing on the wall.</td></tr>
+    </table>
+    <ul class="chips">
+      <li>Rive CLI</li><li>RML</li><li>GPU Canvas · WGSL</li><li>Luau scripting</li><li>Data binding</li><li>State machines</li>
+    </ul>
+    <p class="note" style="margin-top:20px">Every frame of the video is a headless <code>rive --screenshot</code> run that replays real pointer events (down, move, up) through the runtime. The same input drives the knife, the buttons and the sliders.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>Made by <a href="https://taktek.io">Taktek</a> for the <a href="https://contra.com/community/topic/rivehalloweenchallenge">Rive Halloween Challenge</a>. Written with an AI coding agent through the Rive CLI.</p>
+    <p>Fonts: Cormorant Garamond (Christian Thalmann), IBM Plex Mono and IBM Plex Sans Arabic (IBM), all under the SIL Open Font License. Code: MIT.</p>
+  </div>
+</footer>
+</body>
+</html>
