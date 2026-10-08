@@ -13,7 +13,7 @@ You carve a pumpkin with the pointer. A closed cut pops the piece out, and it tu
 | ![Carving by moonlight](media/hollow-carving.png) | ![The mashrabiya stencil, lit](media/hollow-mashrabiya.png) |
 | ![Snuffed: the eyes stay](media/hollow-snuffed.png) | ![The ghoul stencil: cut and etched](media/hollow-ghoul.png) |
 
-Video (72 s, no voice): [media/hollow.mp4](media/hollow.mp4)
+Video (79 s, 1600×1000, synthesised sound, no voice): [media/hollow.mp4](media/hollow.mp4) · page: https://taktekhq.github.io/hollow/
 
 ## What it does
 
@@ -62,13 +62,18 @@ To publish an embeddable page, run `rive . --publish=web`. This needs `rive logi
 
 ### The video
 
-`tools/timeline.py` scripts a person's pointer as timed `down/move/up` events. `tools/render_take.py` renders every frame as its own headless `rive --screenshot` run that replays the events up to that moment, in parallel workers with one project copy each. `tools/make_video.py` (Pillow + numpy) adds the title, the source/CLI segment, the pointer, the feature callouts, the end card and a synthesised soundtrack (room tone, knife pops, match, gust, snuff), then encodes with ffmpeg.
+`tools/timeline.py` scripts a person's pointer as timed `down/move/up` events. `tools/render_take.py` renders every frame as its own headless `rive --screenshot` run that replays the events up to that moment, in parallel workers with one project copy each. `tools/make_video.py` (Pillow + numpy) adds the title, the source/CLI segment, the pointer, the feature callouts and the credits, and synthesises the soundtrack from the same input events (knife scrapes while the pointer is down on the pumpkin, the pop and the thud of each piece, the match, the flame, the gust, the swell when the wall looks back, the snuff, a music-box theme and room tone). `tools/make_stills.py` pulls the stills and the cover from the same frames.
+
+One command rebuilds all of it (about an hour on a busy machine):
 
 ```bash
-python3 tools/render_take.py carve /tmp/hollow_frames/carve --jobs 8
-python3 tools/render_take.py mash  /tmp/hollow_frames/mash  --jobs 8
-~/venvs/pw/bin/python tools/make_video.py /tmp/hollow_frames media/hollow.mp4
+tools/render_all.sh            # verify, render both takes at 1600x1000, cut media/hollow.mp4, write the stills + media/hero.jpg
+KEEP=1 tools/render_all.sh     # reuse rendered frames (after editing only the cut or the sound)
 ```
+
+On a machine with a second GPU whose driver is flaky, headless EGL can fail with `eglInitialize failed (no display server)`. The scripts set `EGL_PLATFORM=surfaceless`, which goes straight to the working GPU.
+
+The page (`site/index.html`, plus `media/` and `fonts/`) is published to GitHub Pages by `.github/workflows/pages.yml` on every push to `main`.
 
 ## Rive Editor touch-ups (planned)
 

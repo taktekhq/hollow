@@ -143,7 +143,7 @@ add(f'''        <Node x="{X0 + 4}" y="84" name="Tool Pill" id="{TOOL_PILL}">
 add(rrect('Tool Track', X0, 80, IW, 44, 14, fill='14FFFFFF', stroke='1FFFFFFF'))
 
 # --- stencils
-children += label('Label Stencils', 148, 'STENCILS  ·  WATCH IT CARVE')
+children += label('Label Stencils', 148, 'STENCILS  ·  AUTO-CARVE')
 for i, (name, hint, hid, arabic) in enumerate([
         ('Grin', 'CLASSIC', HIT_GRIN, False),
         ('Ghoul', 'CUT + ETCH', HIT_GHOUL, False),

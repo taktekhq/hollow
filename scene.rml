@@ -63,7 +63,7 @@
             <TextStylePaint fontSize="11" fontAssetId="0:33" familyName="IBM Plex Mono" styleName="Medium" letterSpacing="2.2" name="Label Stencils Style" id="0:2012">
                 <Fill name="Fill"><SolidColor colorValue="FF9C9384" name="C"/></Fill>
             </TextStylePaint>
-            <TextValueRun styleId="0:2012" text="STENCILS  ·  WATCH IT CARVE" name="Run"/>
+            <TextValueRun styleId="0:2012" text="STENCILS  ·  AUTO-CARVE" name="Run"/>
         </Text>
         <Shape x="1000" y="168" name="Hit Grin" id="0:112">
             <Rectangle width="216" height="42" originX="0" originY="0" name="Path"/>

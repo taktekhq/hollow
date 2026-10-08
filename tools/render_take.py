@@ -21,6 +21,9 @@ from timeline import TAKES  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RIVE = os.path.expanduser('~/.rive/bin/rive')
+# the XPS's second GPU (nouveau) sometimes fails to resume and Mesa's default
+# EGL platform then gives up; the surfaceless platform goes straight to the iGPU
+os.environ.setdefault('EGL_PLATFORM', 'surfaceless')
 FILES = ['rive.yaml', 'scene.rml', 'main.luau', 'light.wgsl', 'fonts']
 
 

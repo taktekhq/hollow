@@ -78,15 +78,17 @@ fn leak(m: vec4<f32>) -> f32 {
     return m.r + 0.28 * max(m.g - m.r, 0.0);
 }
 
-// the soft glow of the quarter-size mask over a ring of taps
-fn glow(uv: vec2<f32>, radius: f32) -> f32 {
+// the soft glow of the quarter-size mask: two rings of taps, rotated per
+// pixel so the taps never line up into stepped copies of the cut
+fn glow(uv: vec2<f32>, radius: f32, rot: f32) -> f32 {
     var acc = leak(textureSample(maskLoTex, samp, uv)) * 2.0;
     let px = radius / u.res;
-    for (var i = 0; i < 8; i = i + 1) {
-        let a = f32(i) * 0.7854 + 0.4;
-        acc = acc + leak(textureSample(maskLoTex, samp, uv + vec2<f32>(cos(a), sin(a)) * px));
+    for (var i = 0; i < 10; i = i + 1) {
+        let a = f32(i) * 0.6283 + rot;
+        let r = select(1.0, 0.5, (i & 1) == 1);
+        acc = acc + leak(textureSample(maskLoTex, samp, uv + vec2<f32>(cos(a), sin(a)) * px * r));
     }
-    return acc / 10.0;
+    return acc / 12.0;
 }
 
 // a candle flame, seen through the holes: a teardrop whose tip bends with the lean
@@ -138,13 +140,14 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     var col = alb * (ambient + warm * (spill * (1.0 - body) + pool * 0.9));
 
     // the rind: lit from inside near every cut, glowing through thin skin
-    let near = glow(uv, 9.0 * s);
-    let wide = glow(uv, 26.0 * s);
-    let sss = (near * 1.3 + wide * 1.0) * F;
+    let rot = hash2(floor(px)) * 6.2832;
+    let near = glow(uv, 9.0 * s, rot);
+    let wide = glow(uv, 26.0 * s, rot + 1.7);
+    let sss = (near * 1.3 + wide * 0.7) * F;
     col = col + body * (1.0 - cut) * vec3<f32>(1.0, 0.36, 0.05) * sss * 0.95;
     // the whole pumpkin warms a little from within
     let inner = 1.0 - smoothstep(0.2, 1.05, length(rel * vec2<f32>(1.0, 1.1)));
-    col = col + body * (1.0 - cut) * vec3<f32>(0.62, 0.2, 0.03) * inner * F * 0.55 + body * (1.0 - cut) * vec3<f32>(0.3, 0.09, 0.015) * F * 0.5;
+    col = col + body * (1.0 - cut) * vec3<f32>(0.62, 0.2, 0.03) * inner * F * 0.36 + body * (1.0 - cut) * vec3<f32>(0.3, 0.09, 0.015) * F * 0.3;
 
     // etched skin: paler flesh in the moon, glowing amber once lit
     let flesh = vec3<f32>(0.98, 0.78, 0.46);
@@ -158,13 +161,30 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     let rim = cut * (1.0 - behind);
     let wallFall = exp(-dFlame / 170.0);
     var interior = vec3<f32>(0.035, 0.014, 0.006) + vec3<f32>(0.04, 0.05, 0.08) * (1.0 - L) * 0.4;
-    interior = interior + vec3<f32>(1.0, 0.45, 0.08) * F * (0.35 + 1.5 * wallFall);
-    // stringy flesh inside: a little texture
-    let strings = fbm(px / (s * 14.0) + vec2<f32>(0.0, 3.0));
-    interior = interior * (0.75 + 0.5 * strings);
-    // the candle: white wax below the flame
-    let wax = (1.0 - smoothstep(14.0, 16.0, abs(px.x - u.flamePos.x) / s)) * smoothstep(4.0, 8.0, (px.y - u.flamePos.y) / s) * (1.0 - smoothstep(70.0, 74.0, (px.y - u.flamePos.y) / s));
-    interior = mix(interior, vec3<f32>(0.9, 0.74, 0.5) * (0.04 + 0.5 * F), wax * smoothstep(34.0, 8.0, (px.y - u.flamePos.y) / s));
+    // the back wall: hot gold close to the flame, deep red-orange towards the rim,
+    // with the inner ribs of the pumpkin showing as soft vertical bands
+    let ribs = 0.86 + 0.14 * cos(rel.x * 15.7 + 0.6) * (1.0 - abs(rel.x) * 0.5);
+    let fibre = 0.94 + 0.12 * fbm(vec2<f32>(px.x / (s * 9.0), px.y / (s * 40.0)));
+    let wallHot = mix(vec3<f32>(0.78, 0.22, 0.03), vec3<f32>(1.0, 0.72, 0.30), wallFall);
+    interior = interior + wallHot * F * (0.30 + 1.45 * wallFall) * ribs * fibre;
+    // inside the lid it stays darker
+    interior = interior * (1.0 - 0.45 * smoothstep(-0.2, -0.75, rel.y) * (1.0 - wallFall));
+    // the candle: a stub of wax under the flame, lit from the top, rounder at the sides
+    let cdx = (px.x - u.flamePos.x) / s;
+    let cdy = (px.y - u.flamePos.y) / s;
+    let cw = 13.0;
+    let side = clamp(abs(cdx) / cw, 0.0, 1.0);
+    let cyl = sqrt(max(1.0 - side * side, 0.0));
+    let topY = 7.0 + 3.0 * sqrt(max(1.0 - side * side, 0.0));
+    let waxIn = (1.0 - smoothstep(cw - 0.8, cw + 0.4, abs(cdx))) * smoothstep(topY - 1.2, topY + 0.3, cdy);
+    let waxLight = (0.05 + F * (0.42 + 1.1 * exp(-max(cdy - topY, 0.0) / 40.0))) * (0.45 + 0.55 * cyl + 0.25 * smoothstep(0.2, -0.6, cdx / cw));
+    var waxCol = vec3<f32>(1.0, 0.74, 0.42) * waxLight;
+    // translucent glow at the top where the wax pools around the wick
+    waxCol = waxCol + vec3<f32>(1.0, 0.55, 0.15) * F * exp(-max(cdy - topY, 0.0) / 5.0) * 0.8 * cyl;
+    interior = mix(interior, waxCol, waxIn);
+    // the wick
+    let wick = (1.0 - smoothstep(0.7, 1.4, abs(cdx - u.lean * 1.5))) * smoothstep(-1.0, 0.0, cdy) * (1.0 - smoothstep(topY - 0.5, topY + 0.5, cdy));
+    interior = mix(interior, vec3<f32>(0.08, 0.05, 0.04), wick);
     let fl = flameShape(px, s);
     let core = flameShape(px + vec2<f32>(0.0, -6.0 * s), s * 0.55);
     interior = interior + (vec3<f32>(1.0, 0.62, 0.18) * fl * 2.2 + vec3<f32>(1.0, 0.95, 0.8) * core * 2.0) * min(F * 1.4, 1.0) * step(0.02, u.flameSize);
@@ -205,7 +225,12 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     // the carving thrown large into the haze, as if on smoke
     let projUv = (u.flamePos + fromFlame / 2.6) / u.res;
     let projSharp = leak(textureSample(maskTex, samp, projUv));
-    let projSoft = leak(textureSample(maskLoTex, samp, projUv));
+    let pr = 5.0 * s / u.res;
+    let projSoft = (leak(textureSample(maskLoTex, samp, projUv)) * 2.0
+        + leak(textureSample(maskLoTex, samp, projUv + vec2<f32>(cos(rot), sin(rot)) * pr))
+        + leak(textureSample(maskLoTex, samp, projUv - vec2<f32>(cos(rot), sin(rot)) * pr))
+        + leak(textureSample(maskLoTex, samp, projUv + vec2<f32>(-sin(rot), cos(rot)) * pr))
+        + leak(textureSample(maskLoTex, samp, projUv - vec2<f32>(-sin(rot), cos(rot)) * pr))) / 6.0;
     let proj = mix(projSoft, projSharp, 0.6) * (1.0 - body) * (0.35 + 0.65 * hz) * F;
     let dist = smoothstep(120.0, 380.0, dFlame) * (1.0 - smoothstep(700.0, 1100.0, dFlame));
     let glass = 1.0 - smoothstep(0.04, 0.12, dot(em, vec3<f32>(0.3, 0.5, 0.2)));
